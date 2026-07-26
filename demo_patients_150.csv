@@ -1,0 +1,151 @@
+Patient Name,Age,Sex,Caregiver Name,Caregiver Phone,Condition,Protocol,Discharge Date,Ward,Medication,Med Type,AWaRe Category,Course Days,Doses/Day
+Venkatesh Ayya,29,M,Kumar Ayya,+919536146025,C-section wound care,wound_care,2026-07-19,Ward-2,Cefuroxime 500mg,antibiotic,Watch,5,2
+Venkatesh Shetty,71,M,Kumar Shetty,+917946785248,Laceration repair,wound_care,2026-07-18,Ward-4,Amoxiclav 625mg,antibiotic,Watch,5,2
+Lakshmamma Rao,61,F,Geeta Rao,+917438989805,Typhoid on cefixime,antibiotic_course,2026-07-24,Ward-3,Amoxicillin 500mg,antibiotic,Access,7,3
+Suma Kulkarni,33,F,Asha Kulkarni,+918625792787,Typhoid fever,fever_viral,2026-07-24,Emergency,Paracetamol 500mg,other,,5,3
+Banu Hegde,26,F,Priya Hegde,+917196814233,Malaria,fever_viral,2026-07-15,Ward-4,Ibuprofen 400mg,other,,3,2
+Vinod Shetty,64,M,Suresh Shetty,+917698594025,Dengue fever,fever_viral,2026-07-20,Ward-5,Paracetamol 650mg,other,,5,3
+Rathnamma Devi,49,F,Asha Devi,+917701808367,Burn wound management,wound_care,2026-07-18,Ward-3,Amoxiclav 625mg,antibiotic,Watch,5,2
+Yashoda Kumar,22,F,Geeta Kumar,+918354860540,Cellulitis on amoxicillin,antibiotic_course,2026-07-19,Ward-1,Amoxicillin 500mg,antibiotic,Access,7,3
+Savithramma Reddy,76,F,Kavita Reddy,+917613628803,Malaria,fever_viral,2026-07-21,Emergency,Paracetamol 500mg,other,,5,3
+Vijay Ayya,69,M,Ramesh Ayya,+918554762903,Pharyngitis on amoxicillin,antibiotic_course,2026-07-22,ICU,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Nagaraj Pai,38,M,Kumar Pai,+919922644564,Post-op appendectomy,wound_care,2026-07-19,Ward-3,Amoxiclav 625mg,antibiotic,Watch,5,2
+Darshan Desai,19,M,Ramesh Desai,+919921794983,Skin infection on clindamycin,antibiotic_course,2026-07-14,Ward-5,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Basavaraju Murthy,38,M,Suresh Murthy,+918948728483,Malaria,fever_viral,2026-07-25,Ward-5,Paracetamol 500mg,other,,5,3
+Parvathi Rao,65,F,Geeta Rao,+917693847829,UTI on ciprofloxacin,antibiotic_course,2026-07-17,Ward-4,Amoxicillin 500mg,antibiotic,Access,7,3
+Vishwanath Naik,25,M,Giri Naik,+918034535593,UTI on ciprofloxacin,antibiotic_course,2026-07-11,Ward-5,Amoxicillin 500mg,antibiotic,Access,7,3
+Mahesh Ayya,78,M,Giri Ayya,+919361388464,UTI on ciprofloxacin,antibiotic_course,2026-07-23,Ward-3,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Rajeshwari Hegde,57,F,Priya Hegde,+918713658874,Cellulitis on amoxicillin,antibiotic_course,2026-07-15,Ward-4,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Kamalakshi Prasad,20,F,Lakshmi Prasad,+919526766690,Cellulitis on amoxicillin,antibiotic_course,2026-07-17,Ward-2,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Uttam Nair,22,M,Ramu Nair,+918419179580,Post-op ACL reconstruction,wound_care,2026-07-24,Ward-4,Amoxiclav 625mg,antibiotic,Watch,5,2
+Sunil Devi,78,M,Giri Devi,+918748309234,Ear infection on cefpodoxime,antibiotic_course,2026-07-22,Emergency,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Rajesh Devi,24,M,Prakash Devi,+919892078691,Pneumonia on levofloxacin,antibiotic_course,2026-07-15,Emergency,Cefixime 200mg,antibiotic,Watch,5,1
+Suresh Desai,75,M,Giri Desai,+917602078388,UTI on ciprofloxacin,antibiotic_course,2026-07-19,Ward-4,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Sunil Bhat,19,M,Ramu Bhat,+917400560567,Post-op hernia repair,wound_care,2026-07-11,Ward-2,Doxycycline 100mg,antibiotic,Access,7,2
+Naveen Joshi,66,M,Giri Joshi,+917009257255,Cellulitis on amoxicillin,antibiotic_course,2026-07-19,Ward-1,Cefixime 200mg,antibiotic,Watch,5,1
+Lalitha Iyer,55,F,Geeta Iyer,+917935018220,Ear infection on cefpodoxime,antibiotic_course,2026-07-25,Ward-3,Cefixime 200mg,antibiotic,Watch,5,1
+Gundappa Naik,83,M,Ramu Naik,+917344076115,Post-op thyroidectomy,wound_care,2026-07-12,Ward-3,Doxycycline 100mg,antibiotic,Access,7,2
+Ganesh Hegde,49,M,Ramesh Hegde,+919486438403,C-section wound care,wound_care,2026-07-16,Ward-2,Doxycycline 100mg,antibiotic,Access,7,2
+Yogesh Shetty,44,M,Mallik Shetty,+919876451163,Dental infection on metronidazole,antibiotic_course,2026-07-14,OPD,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Tulasi Menon,27,F,Lakshmi Menon,+917040009587,Burn wound management,wound_care,2026-07-18,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3
+Ganesh Murthy,49,M,Ramu Murthy,+918587106770,Post-op knee replacement,wound_care,2026-07-21,OPD,Cefuroxime 500mg,antibiotic,Watch,5,2
+Jagadish Murthy,56,M,Kumar Murthy,+919849232839,Dental infection on metronidazole,antibiotic_course,2026-07-24,Ward-1,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Anil Hegde,44,M,Ramesh Hegde,+918472659626,Chikungunya,fever_viral,2026-07-22,Ward-5,Paracetamol 650mg,other,,5,3
+Parvathi Pai,53,F,Rani Pai,+917189351213,Post-op appendectomy,wound_care,2026-07-25,ICU,Amoxiclav 625mg,antibiotic,Watch,5,2
+Kamala Kumar,72,F,Asha Kumar,+919409076656,Chikungunya,fever_viral,2026-07-25,Emergency,Ibuprofen 400mg,other,,3,2
+Ganesh Amma,34,M,Suresh Amma,+917179653598,Viral fever,fever_viral,2026-07-21,Ward-3,Paracetamol 650mg,other,,5,3
+Honnamma Kulkarni,70,F,Rani Kulkarni,+919665720874,C-section wound care,wound_care,2026-07-14,OPD,Amoxiclav 625mg,antibiotic,Watch,5,2
+Vijay Rao,60,M,Giri Rao,+918768294570,Chikungunya,fever_viral,2026-07-13,Ward-1,Paracetamol 650mg,other,,5,3
+Sunil Rao,78,M,Prakash Rao,+917955345537,Dengue fever,fever_viral,2026-07-22,Ward-1,Paracetamol 650mg,other,,5,3
+Eshwari Iyer,42,F,Priya Iyer,+918711398352,Influenza-like illness,fever_viral,2026-07-20,Ward-1,Paracetamol 500mg,other,,5,3
+Savithramma Menon,32,F,Sita Menon,+918121910732,Laceration repair,wound_care,2026-07-23,OPD,Doxycycline 100mg,antibiotic,Access,7,2
+Honnamma Hegde,83,F,Asha Hegde,+917496694873,Typhoid on cefixime,antibiotic_course,2026-07-19,ICU,Amoxicillin 500mg,antibiotic,Access,7,3
+Anil Patil,73,M,Mallik Patil,+917300535210,Lower RTI on azithromycin,antibiotic_course,2026-07-15,Ward-4,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Aktherabi Naik,70,F,Priya Naik,+918400944900,UTI on ciprofloxacin,antibiotic_course,2026-07-19,Ward-5,Amoxicillin 500mg,antibiotic,Access,7,3
+Shobha Kamath,56,F,Asha Kamath,+918744079573,Burn wound management,wound_care,2026-07-17,Ward-3,Doxycycline 100mg,antibiotic,Access,7,2
+Rahul Iyer,74,M,Suresh Iyer,+919901796894,Post-op thyroidectomy,wound_care,2026-07-22,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3
+Lakshmi Rao,48,F,Sita Rao,+919889635392,Pharyngitis on amoxicillin,antibiotic_course,2026-07-21,OPD,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Prakash Kamath,71,M,Suresh Kamath,+919704821724,C-section wound care,wound_care,2026-07-16,Ward-2,Doxycycline 100mg,antibiotic,Access,7,2
+Eshwarappa Amma,18,M,Kumar Amma,+917457788949,Diabetic foot ulcer,wound_care,2026-07-13,Ward-3,Cefuroxime 500mg,antibiotic,Watch,5,2
+Sarojini Rao,33,F,Rani Rao,+918960488639,Post-viral fatigue,fever_viral,2026-07-23,Ward-4,Paracetamol 500mg,other,,5,3
+Devi Prasad,75,F,Rani Prasad,+917683577992,Malaria,fever_viral,2026-07-14,ICU,Paracetamol 650mg,other,,5,3
+Kamalakshi Menon,48,F,Priya Menon,+918179387055,Typhoid fever,fever_viral,2026-07-18,Emergency,Ibuprofen 400mg,other,,3,2
+Eshwarappa Iyer,37,M,Giri Iyer,+917993260504,Abscess drainage,wound_care,2026-07-19,Ward-2,Metronidazole 400mg,antibiotic,Watch,7,3
+Eshwarappa Reddy,25,M,Suresh Reddy,+917888346940,Diabetic foot ulcer,wound_care,2026-07-12,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3
+Girija Swamy,18,F,Kavita Swamy,+918510792572,Viral fever,fever_viral,2026-07-21,ICU,Ibuprofen 400mg,other,,3,2
+Indira Murthy,46,F,Kavita Murthy,+918172248246,Ear infection on cefpodoxime,antibiotic_course,2026-07-19,Ward-4,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Gangamma Desai,77,F,Rani Desai,+917548157187,Burn wound management,wound_care,2026-07-16,Ward-3,Doxycycline 100mg,antibiotic,Access,7,2
+Gopal Swamy,77,M,Giri Swamy,+917780520225,Lower RTI on azithromycin,antibiotic_course,2026-07-25,ICU,Azithromycin 500mg,antibiotic,Watch,3,1
+Girija Naik,71,F,Lakshmi Naik,+918083497965,Abscess drainage,wound_care,2026-07-12,ICU,Metronidazole 400mg,antibiotic,Watch,7,3
+Lokesh Gowda,26,M,Kumar Gowda,+919799264931,Lower RTI on azithromycin,antibiotic_course,2026-07-25,Ward-4,Amoxicillin 500mg,antibiotic,Access,7,3
+Vijay Reddy,32,M,Suresh Reddy,+919422230882,Chikungunya,fever_viral,2026-07-22,Ward-3,Paracetamol 500mg,other,,5,3
+Hemapala Menon,38,F,Rani Menon,+918335901990,Chikungunya,fever_viral,2026-07-24,Ward-2,Ibuprofen 400mg,other,,3,2
+Rahul Swamy,49,M,Ramu Swamy,+917437662764,Pneumonia on levofloxacin,antibiotic_course,2026-07-14,Ward-4,Cefixime 200mg,antibiotic,Watch,5,1
+Gouri Hegde,65,F,Priya Hegde,+917296166921,Viral fever,fever_viral,2026-07-17,ICU,Paracetamol 650mg,other,,5,3
+Lakshmamma Joshi,76,F,Priya Joshi,+917657091982,Dengue fever,fever_viral,2026-07-19,OPD,Paracetamol 650mg,other,,5,3
+Fakirappa Prasad,73,M,Suresh Prasad,+919544659112,Typhoid fever,fever_viral,2026-07-21,Emergency,Ibuprofen 400mg,other,,3,2
+Tulasi Shetty,66,F,Asha Shetty,+918444812497,Post-op cholecystectomy,wound_care,2026-07-25,Emergency,Cefuroxime 500mg,antibiotic,Watch,5,2
+Chandrakala Rao,53,F,Lakshmi Rao,+919387104291,Typhoid on cefixime,antibiotic_course,2026-07-25,OPD,Amoxicillin 500mg,antibiotic,Access,7,3
+Mahesh Nair,78,M,Kumar Nair,+919774131811,Skin infection on clindamycin,antibiotic_course,2026-07-14,Ward-4,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Kamalakshi Gowda,65,F,Lakshmi Gowda,+919032638323,C-section wound care,wound_care,2026-07-17,Ward-4,Doxycycline 100mg,antibiotic,Access,7,2
+Jayalakshmi Ayya,50,F,Lakshmi Ayya,+917990153355,Typhoid on cefixime,antibiotic_course,2026-07-24,Ward-5,Cefixime 200mg,antibiotic,Watch,5,1
+Arun Hegde,79,M,Kumar Hegde,+918187556862,"Wound infection, ceftriaxone",antibiotic_course,2026-07-14,Ward-4,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Suma Reddy,34,F,Sita Reddy,+918178158203,Abscess drainage,wound_care,2026-07-25,Ward-5,Cefuroxime 500mg,antibiotic,Watch,5,2
+Shankar Iyer,19,M,Prakash Iyer,+919465587067,"Wound infection, ceftriaxone",antibiotic_course,2026-07-21,Ward-2,Cefixime 200mg,antibiotic,Watch,5,1
+Manjula Bhat,26,F,Sita Bhat,+918721025347,Post-op appendectomy,wound_care,2026-07-18,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3
+Tukaram Kumar,49,M,Ramu Kumar,+917508745584,"Wound infection, ceftriaxone",antibiotic_course,2026-07-17,Ward-5,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Zakirabi Hegde,74,F,Kavita Hegde,+918277121963,Influenza-like illness,fever_viral,2026-07-12,ICU,Ibuprofen 400mg,other,,3,2
+Bhagyashree Swamy,45,F,Priya Swamy,+918136646449,Dental infection on metronidazole,antibiotic_course,2026-07-15,Ward-4,Azithromycin 500mg,antibiotic,Watch,3,1
+Naveen Nair,75,M,Suresh Nair,+919960826470,Post-op hernia repair,wound_care,2026-07-16,Ward-1,Cefuroxime 500mg,antibiotic,Watch,5,2
+Annapurna Patil,47,F,Sita Patil,+918136253459,Post-op ACL reconstruction,wound_care,2026-07-13,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3
+Ishwar Hegde,36,M,Prakash Hegde,+917306702926,Bone infection on linezolid,antibiotic_course,2026-07-25,Ward-5,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Rahul Hegde,77,M,Ramu Hegde,+919957849462,Dental infection on metronidazole,antibiotic_course,2026-07-21,Emergency,Amoxicillin 500mg,antibiotic,Access,7,3
+Yashoda Prasad,59,F,Kavita Prasad,+919592930364,Skin infection on clindamycin,antibiotic_course,2026-07-21,Ward-1,Azithromycin 500mg,antibiotic,Watch,3,1
+Mahesh Nair,23,M,Ramesh Nair,+917752438459,Viral fever,fever_viral,2026-07-18,Ward-5,Ibuprofen 400mg,other,,3,2
+Yashoda Rao,78,F,Sita Rao,+918494481363,Unexplained fever,fever_viral,2026-07-19,Emergency,Ibuprofen 400mg,other,,3,2
+Chandrakala Devi,81,F,Priya Devi,+918237886015,Circumcision post-op,wound_care,2026-07-15,ICU,Metronidazole 400mg,antibiotic,Watch,7,3
+Malathi Murthy,32,F,Lakshmi Murthy,+918735918651,Post-op hernia repair,wound_care,2026-07-12,Ward-5,Metronidazole 400mg,antibiotic,Watch,7,3
+Thimmappa Murthy,81,M,Ramesh Murthy,+919686110098,Lower RTI on azithromycin,antibiotic_course,2026-07-18,OPD,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Ravi Menon,21,M,Ramu Menon,+919705925058,Pharyngitis on amoxicillin,antibiotic_course,2026-07-16,Emergency,Cefixime 200mg,antibiotic,Watch,5,1
+Eshwarappa Rao,32,M,Giri Rao,+918981903597,Post-op appendectomy,wound_care,2026-07-24,Ward-2,Doxycycline 100mg,antibiotic,Access,7,2
+Mohan Amma,79,M,Prakash Amma,+919028168523,Post-op ACL reconstruction,wound_care,2026-07-22,ICU,Metronidazole 400mg,antibiotic,Watch,7,3
+Shobha Kamath,71,F,Lakshmi Kamath,+918459753033,Post-op thyroidectomy,wound_care,2026-07-11,Ward-2,Cefuroxime 500mg,antibiotic,Watch,5,2
+Lakshmamma Iyer,37,F,Rani Iyer,+918917906456,Dental infection on metronidazole,antibiotic_course,2026-07-17,Emergency,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Eshwari Naik,42,F,Lakshmi Naik,+919995732958,Ear infection on cefpodoxime,antibiotic_course,2026-07-22,Emergency,Cefixime 200mg,antibiotic,Watch,5,1
+Sarojini Joshi,37,F,Kavita Joshi,+919127420335,Post-op ACL reconstruction,wound_care,2026-07-25,ICU,Doxycycline 100mg,antibiotic,Access,7,2
+Nagaraj Swamy,76,M,Ramesh Swamy,+917065917432,Post-op hernia repair,wound_care,2026-07-14,Ward-2,Doxycycline 100mg,antibiotic,Access,7,2
+Harish Kumar,68,M,Mallik Kumar,+919791027186,Dengue fever,fever_viral,2026-07-24,Ward-5,Paracetamol 650mg,other,,5,3
+Gouri Murthy,26,F,Asha Murthy,+918008330525,Abscess drainage,wound_care,2026-07-15,Ward-1,Doxycycline 100mg,antibiotic,Access,7,2
+Sarojini Ayya,56,F,Geeta Ayya,+917124327519,Post-op hernia repair,wound_care,2026-07-25,Emergency,Amoxiclav 625mg,antibiotic,Watch,5,2
+Parvathamma Iyer,70,F,Asha Iyer,+919430642523,Diabetic foot ulcer,wound_care,2026-07-15,Ward-4,Cefuroxime 500mg,antibiotic,Watch,5,2
+Naveen Rao,36,M,Ramesh Rao,+917997241761,Diabetic foot ulcer,wound_care,2026-07-18,Emergency,Cefuroxime 500mg,antibiotic,Watch,5,2
+Lalitha Menon,74,F,Sita Menon,+918484193033,Skin infection on clindamycin,antibiotic_course,2026-07-16,Ward-3,Amoxicillin 500mg,antibiotic,Access,7,3
+Banu Joshi,79,F,Kavita Joshi,+917458072318,Skin infection on clindamycin,antibiotic_course,2026-07-22,Ward-4,Amoxicillin 500mg,antibiotic,Access,7,3
+Usha Kulkarni,19,F,Lakshmi Kulkarni,+919430646623,Pharyngitis on amoxicillin,antibiotic_course,2026-07-12,ICU,Azithromycin 500mg,antibiotic,Watch,3,1
+Vishwanath Ayya,42,M,Giri Ayya,+919666707262,Pharyngitis on amoxicillin,antibiotic_course,2026-07-21,OPD,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Shivakumar Hegde,64,M,Ramu Hegde,+917564409423,Viral fever,fever_viral,2026-07-24,Emergency,Paracetamol 650mg,other,,5,3
+Chandrakala Ayya,82,F,Asha Ayya,+918170496062,Cellulitis on amoxicillin,antibiotic_course,2026-07-12,OPD,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Anil Pai,32,M,Prakash Pai,+919011467975,Typhoid fever,fever_viral,2026-07-24,OPD,Ibuprofen 400mg,other,,3,2
+Huligeshi Nair,68,M,Ramu Nair,+917059780189,Unexplained fever,fever_viral,2026-07-21,OPD,Ibuprofen 400mg,other,,3,2
+Keshav Kulkarni,65,M,Prakash Kulkarni,+917465342967,Bone infection on linezolid,antibiotic_course,2026-07-15,ICU,Amoxicillin 500mg,antibiotic,Access,7,3
+Lokesh Gowda,26,M,Kumar Gowda,+919729039064,Ear infection on cefpodoxime,antibiotic_course,2026-07-12,Ward-4,Amoxicillin 500mg,antibiotic,Access,7,3
+Hemapala Iyer,56,F,Sita Iyer,+919115806625,UTI on ciprofloxacin,antibiotic_course,2026-07-24,Ward-1,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Vijay Murthy,37,M,Ramesh Murthy,+918781915481,Post-op cholecystectomy,wound_care,2026-07-15,ICU,Metronidazole 400mg,antibiotic,Watch,7,3
+Mohan Hegde,74,M,Giri Hegde,+918909954149,Pharyngitis on amoxicillin,antibiotic_course,2026-07-22,OPD,Azithromycin 500mg,antibiotic,Watch,3,1
+Suma Devi,53,F,Kavita Devi,+917815221547,Burn wound management,wound_care,2026-07-24,Ward-1,Metronidazole 400mg,antibiotic,Watch,7,3
+Shivali Devi,60,F,Rani Devi,+918046120419,Burn wound management,wound_care,2026-07-23,Ward-1,Amoxiclav 625mg,antibiotic,Watch,5,2
+Ganesh Murthy,36,M,Prakash Murthy,+919559721644,C-section wound care,wound_care,2026-07-25,OPD,Cefuroxime 500mg,antibiotic,Watch,5,2
+Latha Kamath,19,F,Geeta Kamath,+918538638860,"Wound infection, ceftriaxone",antibiotic_course,2026-07-13,Ward-1,Azithromycin 500mg,antibiotic,Watch,3,1
+Uttam Naik,71,M,Kumar Naik,+919259520140,Post-op knee replacement,wound_care,2026-07-24,Ward-3,Amoxiclav 625mg,antibiotic,Watch,5,2
+Lokesh Bhat,23,M,Ramesh Bhat,+919829967158,Dengue fever,fever_viral,2026-07-17,Ward-4,Paracetamol 650mg,other,,5,3
+Lalitha Kumar,31,F,Kavita Kumar,+919105688676,Viral fever,fever_viral,2026-07-14,ICU,Paracetamol 650mg,other,,5,3
+Savithramma Shetty,59,F,Lakshmi Shetty,+918635971911,Circumcision post-op,wound_care,2026-07-16,Ward-3,Amoxiclav 625mg,antibiotic,Watch,5,2
+Lalitha Prasad,75,F,Kavita Prasad,+917981372436,UTI on ciprofloxacin,antibiotic_course,2026-07-19,Ward-4,Azithromycin 500mg,antibiotic,Watch,3,1
+Lalitha Desai,50,F,Lakshmi Desai,+918607610633,UTI on ciprofloxacin,antibiotic_course,2026-07-23,ICU,Amoxicillin 500mg,antibiotic,Access,7,3
+Savithramma Shetty,65,F,Priya Shetty,+917558841618,Dengue fever,fever_viral,2026-07-17,Ward-2,Paracetamol 650mg,other,,5,3
+Uttam Murthy,72,M,Mallik Murthy,+917220959215,Bone infection on linezolid,antibiotic_course,2026-07-21,ICU,Azithromycin 500mg,antibiotic,Watch,3,1
+Eshwari Hegde,31,F,Geeta Hegde,+918503728142,Cellulitis on amoxicillin,antibiotic_course,2026-07-12,Emergency,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Vijaya Menon,52,F,Asha Menon,+917124352982,Pneumonia on levofloxacin,antibiotic_course,2026-07-23,Ward-1,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Hemapala Iyer,36,F,Rani Iyer,+919432330583,Malaria,fever_viral,2026-07-15,Ward-3,Paracetamol 500mg,other,,5,3
+Savithramma Kamath,71,F,Kavita Kamath,+918948393831,Lower RTI on azithromycin,antibiotic_course,2026-07-20,Ward-4,Azithromycin 500mg,antibiotic,Watch,3,1
+Chandrashekar Iyer,37,M,Ramu Iyer,+917676070354,Dental infection on metronidazole,antibiotic_course,2026-07-13,Ward-2,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Basavaraju Shetty,74,M,Ramesh Shetty,+918778905619,Burn wound management,wound_care,2026-07-21,Emergency,Doxycycline 100mg,antibiotic,Access,7,2
+Huligeshi Prasad,80,M,Kumar Prasad,+919263164755,Diabetic foot ulcer,wound_care,2026-07-15,Ward-5,Amoxiclav 625mg,antibiotic,Watch,5,2
+Honnamma Nair,56,F,Geeta Nair,+917907243029,Post-op thyroidectomy,wound_care,2026-07-13,Ward-1,Amoxiclav 625mg,antibiotic,Watch,5,2
+Huligeshi Menon,73,M,Kumar Menon,+917754603440,Post-op hernia repair,wound_care,2026-07-23,Emergency,Amoxiclav 625mg,antibiotic,Watch,5,2
+Saroja Amma,23,F,Kavita Amma,+918873548915,Laceration repair,wound_care,2026-07-25,Ward-2,Metronidazole 400mg,antibiotic,Watch,7,3
+Savithramma Naik,32,F,Lakshmi Naik,+918739600515,Dental infection on metronidazole,antibiotic_course,2026-07-25,ICU,Cefixime 200mg,antibiotic,Watch,5,1
+Mahadevi Hegde,31,F,Rani Hegde,+918045036297,Typhoid on cefixime,antibiotic_course,2026-07-19,ICU,Azithromycin 500mg,antibiotic,Watch,3,1
+Rajeshwari Shetty,39,F,Lakshmi Shetty,+917328046924,Post-op knee replacement,wound_care,2026-07-17,Ward-4,Metronidazole 400mg,antibiotic,Watch,7,3
+Paramesh Prasad,31,M,Giri Prasad,+917628973138,Abscess drainage,wound_care,2026-07-21,Ward-3,Metronidazole 400mg,antibiotic,Watch,7,3
+Kiran Hegde,81,M,Prakash Hegde,+918992663260,Burn wound management,wound_care,2026-07-13,Ward-3,Amoxiclav 625mg,antibiotic,Watch,5,2
+Gouri Swamy,74,F,Geeta Swamy,+917293287259,Dental infection on metronidazole,antibiotic_course,2026-07-18,OPD,Amoxicillin 500mg,antibiotic,Access,7,3
+Banu Iyer,77,F,Lakshmi Iyer,+918940955281,Viral fever,fever_viral,2026-07-25,Ward-2,Paracetamol 650mg,other,,5,3
+Chandrashekar Iyer,23,M,Ramesh Iyer,+918931591531,Post-op hernia repair,wound_care,2026-07-11,Emergency,Doxycycline 100mg,antibiotic,Access,7,2
+Arun Hegde,61,M,Ramu Hegde,+917362190850,"Wound infection, ceftriaxone",antibiotic_course,2026-07-17,Emergency,Azithromycin 500mg,antibiotic,Watch,3,1
+Manjunath Nair,65,M,Mallik Nair,+918215018687,Skin infection on clindamycin,antibiotic_course,2026-07-19,Ward-3,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Durga Devi,30,F,Lakshmi Devi,+919396433758,Bone infection on linezolid,antibiotic_course,2026-07-15,Ward-2,Amoxicillin 500mg,antibiotic,Access,7,3
+Annapurna Menon,28,F,Lakshmi Menon,+919502847163,Bone infection on linezolid,antibiotic_course,2026-07-15,Ward-3,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Basavaraj Iyer,66,M,Mallik Iyer,+919763782498,Unexplained fever,fever_viral,2026-07-13,Ward-2,Paracetamol 500mg,other,,5,3
+Kamala Devi,72,F,Priya Devi,+919183941426,Bone infection on linezolid,antibiotic_course,2026-07-20,Ward-2,Levofloxacin 500mg,antibiotic,Reserve,7,1
+Chandrashekar Iyer,46,M,Giri Iyer,+917590838716,C-section wound care,wound_care,2026-07-23,Emergency,Metronidazole 400mg,antibiotic,Watch,7,3

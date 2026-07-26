@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  /* surfaces (opencode.ai dark) */
+  --color-bg: #0c0c0e;
+  --color-surface: #161618;
+  --color-elevated: #1c1c1f;
+  --color-border: #38383a;
+  --color-border-muted: #2c2c2e;
+
+  /* text */
+  --color-text: #ffffff;
+  --color-secondary: #c7c7cc;
+  --color-muted: #a1a1a6;
+  --color-disabled: #86868b;
+
+  /* semantic */
+  --color-accent: #007aff;
+  --color-accent-hover: #0056b3;
+  --color-danger: #ff453a;
+  --color-warning: #ff9f0a;
+  --color-success: #30d158;
+
+  /* type */
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-kn: "Noto Sans Kannada", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--color-accent);
+  animation: blink 1.06s step-end infinite;
+  vertical-align: middle;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.loading-pulse {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .sheet { max-width: none !important; }
+}

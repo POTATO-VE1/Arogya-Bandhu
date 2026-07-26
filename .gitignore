@@ -1,0 +1,41 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+
+# Database
+backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# Generated audio
+backend/data/audio/
+
+# Frontend build output
+frontend/dist/
+frontend/node_modules/
+backend/static/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Temp files
+/tmp/
+*.log
+data/

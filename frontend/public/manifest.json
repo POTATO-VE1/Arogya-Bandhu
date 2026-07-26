@@ -1,0 +1,9 @@
+{
+  "name": "Aarogya Bandhu",
+  "short_name": "AB",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
+  "display": "standalone",
+  "start_url": "/board",
+  "icons": []
+}

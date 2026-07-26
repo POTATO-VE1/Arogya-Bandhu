@@ -1,0 +1,29 @@
+# Build artifacts
+frontend/dist/
+frontend/node_modules/
+backend/static/
+backend/data/*.db*
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE / OS
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+
+# Docs & non-essential
+docs/
+*.md
+!README.md
+LICENSE
