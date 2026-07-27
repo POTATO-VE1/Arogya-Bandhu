@@ -26,50 +26,25 @@
     "q_meds_today": {
       "type": "question", "clip": "q_meds_today", "retries": 1,
       "options": {
-        "1": { "score": 0, "next": "q_pillcount" },
-        "2": { "score": 2, "clip": "counsel_adherence", "reason": "doses missed today", "next": "q_pillcount" },
-        "3": { "score": 6, "clip": "counsel_adherence", "reason": "meds stopped", "next": "q_pillcount" }
+        "1": { "score": 0, "next": "q_pillcount_remaining" },
+        "2": { "score": 2, "clip": "counsel_yellow", "reason": "doses missed today", "next": "q_pillcount_remaining" },
+        "3": { "score": 6, "clip": "red_response", "reason": "meds stopped", "next": "@end_red" }
       }
     },
-    "q_pillcount": {
-      "type": "question", "clip": "q_pillcount", "retries": 1, "requires_antibiotic": true,
+    "q_pillcount_remaining": {
+      "type": "question", "clip": "q_pillcount_remaining", "retries": 1,
       "options": {
-        "1": { "score": 0, "next": "q_self_med" },
-        "2": { "score": 1, "reason": "pills remain: 4-7", "next": "q_self_med" },
-        "3": { "score": 2, "reason": "pills remain: 8+", "next": "q_self_med" }
+        "1": { "score": 0, "next": "closing", "reason": "pill count: 0-3 remaining (adherent)" },
+        "2": { "score": 2, "next": "closing", "reason": "pill count: 4-7 remaining (partial)" },
+        "3": { "score": 6, "next": "closing", "reason": "pill count: 8+ remaining (adherence risk)" }
       }
     },
-    "q_self_med": {
-      "type": "question", "clip": "q_self_med", "retries": 1,
-      "options": {
-        "1": { "score": 0, "next": "q_leftover" },
-        "2": { "score": 3, "clip": "counsel_selfmed", "reason": "self-medication reported", "next": "q_leftover" }
-      }
-    },
-    "q_leftover": {
-      "type": "question", "clip": "q_leftover", "retries": 1,
-      "options": {
-        "1": { "score": 0, "next": "q_course_done" },
-        "2": { "score": 1, "clip": "counsel_leftover", "reason": "leftover antibiotics at home", "next": "q_course_done" }
-      }
-    },
-    "q_course_done": {
-      "type": "question", "clip": "q_course_done", "retries": 1, "min_day_vs_course_end": true,
-      "options": {
-        "1": { "score": 0, "next": "edu_amr" },
-        "2": { "score": 2, "clip": "counsel_adherence", "reason": "course not yet finished", "next": "edu_amr" },
-        "3": { "score": 6, "clip": "counsel_adherence", "reason": "course stopped midway", "next": "edu_amr" }
-      }
-    },
-    "edu_amr": { "type": "play", "clip": "edu_amr", "next": "closing" },
     "closing": { "type": "play", "clip": "closing", "next": "@end_ok" }
   },
   "sheet": {
     "bullets_kn": [
       "ವೈದ್ಯರು ಹೇಳಿದ ಔಷಧಿಯನ್ನು ಪೂರ್ತಿ ಕೋರ್ಸ್ ಮುಗಿಯುವವರೆಗೆ ಸಮಯಕ್ಕೆ ಕೊಡಿ.",
       "ಕಾಯಿಲೆ ಕಡಿಮೆಯಾದರೂ ಮಧ್ಯದಲ್ಲಿ ಔಷಧಿ ನಿಲ್ಲಿಸಬೇಡಿ.",
-      "ಉಳಿದ ಗೋಳಿಗಳನ್ನು ಹಂಚಬೇಡಿ, ಮುಂದಕ್ಕೆ ಬಳಸಬೇಡಿ.",
-      "ವೈದ್ಯರು ಸೂಚಿಸದ ಔಷಧಿ ತಗೊಳ್ಳಬೇಡಿ.",
       "ಜ್ವರ ಹೆಚ್ಚಾದರೆ ಅಥವಾ ಉಸಿರಾಟ ತೊಂದರೆಯಾದರೆ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ."
     ]
   }

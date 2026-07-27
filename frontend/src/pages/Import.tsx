@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { api } from "../api";
 import { Button, C, LogLine, Panel } from "../components";
+import { t } from "../i18n";
 
 type MappingInfo = { field: string | null; confidence: number };
 type RowResult = {
@@ -27,8 +28,6 @@ const FIELDS = [
   { value: "ward", label: "Ward" },
   { value: "med_name", label: "Medication Name" },
   { value: "med_type", label: "Med Type (antibiotic/other)" },
-  { value: "aware_category", label: "AWaRe Category" },
-  { value: "course_days", label: "Course Days" },
   { value: "doses_per_day", label: "Doses/Day" },
 ];
 
@@ -128,7 +127,7 @@ export function Import() {
   return (
     <div>
       <div style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: C.muted, marginBottom: 16 }}>
-        bulk import
+        {t("bulk_import")}
       </div>
 
       {/* step indicator */}
@@ -141,7 +140,7 @@ export function Import() {
             background: step === s ? C.elevated : "transparent",
             color: step === s ? C.text : C.disabled,
           }}>
-            {s === 1 ? "upload" : s === 2 ? "map columns" : "done"}
+            {s === 1 ? t("step_upload") : s === 2 ? t("step_map") : t("step_done")}
           </div>
         ))}
       </div>
@@ -152,7 +151,7 @@ export function Import() {
           {uploadErr && (
             <div style={{ marginBottom: 12 }}>
               <LogLine tone="danger">{uploadErr}</LogLine>
-              <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => setUploadErr(null)}>[ dismiss ]</Button>
+              <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => setUploadErr(null)}>{t("dismiss")}</Button>
             </div>
           )}
           <div
@@ -170,10 +169,10 @@ export function Import() {
             }}
           >
             <div style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: 8 }}>
-              {busy ? "parsing…" : "drop CSV or Excel file here"}
+              {busy ? t("parsing") : t("drop_file")}
             </div>
             <div style={{ fontSize: "0.8125rem", color: C.muted }}>
-              or click to browse · .csv .xlsx · max 10MB
+              {t("browse_hint")}
             </div>
             <input
               ref={fileRef}
@@ -184,7 +183,7 @@ export function Import() {
             />
           </div>
           <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: "0.75rem", color: C.muted, marginBottom: 6 }}>download a template:</div>
+            <div style={{ fontSize: "0.75rem", color: C.muted, marginBottom: 6 }}>{t("download_template")}</div>
             <div style={{ display: "flex", gap: 8 }}>
               {protocols.map(p => (
                 <a key={p} href={`/api/import/template/${p}`} style={{
@@ -205,9 +204,9 @@ export function Import() {
       {/* step 2: map + preview */}
       {step === 2 && (
         <>
-          <Panel title="column mapping" style={{ marginBottom: 16 }}>
+          <Panel title={t("column_mapping")} style={{ marginBottom: 16 }}>
             <div style={{ fontSize: "0.8125rem", color: C.muted, marginBottom: 12 }}>
-              {fileName} · {totalRows} rows · {headers.length} columns detected
+              {fileName} · {totalRows} {t("rows_label")} · {headers.length} {t("columns_detected")}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto", gap: "6px 12px", alignItems: "center" }}>
               {headers.map(h => {
@@ -247,7 +246,7 @@ export function Import() {
                       color: info?.field ? confidenceColor(info.confidence) : C.disabled,
                       minWidth: 40,
                     }}>
-                      {info?.field ? `${Math.round(info.confidence * 100)}%` : "skip"}
+                      {info?.field ? `${Math.round(info.confidence * 100)}%` : t("skip_label")}
                     </div>
                   </div>
                 );
@@ -256,7 +255,7 @@ export function Import() {
 
             {/* defaults */}
             <div style={{ marginTop: 16, display: "flex", gap: 12, alignItems: "center" }}>
-              <div style={{ fontSize: "0.75rem", color: C.muted }}>default protocol:</div>
+              <div style={{ fontSize: "0.75rem", color: C.muted }}>{t("default_protocol")}</div>
               <select
                 value={defaultProtocol}
                 onChange={e => setDefaultProtocol(e.target.value)}
@@ -267,7 +266,7 @@ export function Import() {
               >
                 {protocols.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
-              <div style={{ fontSize: "0.75rem", color: C.muted }}>default ward:</div>
+              <div style={{ fontSize: "0.75rem", color: C.muted }}>{t("default_ward_label")}</div>
               <input
                 value={defaultWard}
                 onChange={e => setDefaultWard(e.target.value)}
@@ -282,19 +281,19 @@ export function Import() {
           </Panel>
 
           {/* preview table */}
-          <Panel title={`preview — ${validCount} valid · ${warnCount} warnings · ${errorCount} errors`}>
+          <Panel title={`${t("preview_prefix")} ${validCount} ${t("valid_label")} · ${warnCount} ${t("warnings_label")} · ${errorCount} ${t("errors_label")}`}>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
                 <thead>
                   <tr>
                     <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>#</th>
-                    <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>status</th>
+                    <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>{t("status_col")}</th>
                     {["name", "caregiver_phone", "condition_label", "protocol_id", "ward", "med_name"].map(f => (
                       <th key={f} style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>
                         {f.replace("_", " ")}
                       </th>
                     ))}
-                    <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>issues</th>
+                    <th style={{ textAlign: "left", padding: "6px 8px", borderBottom: `1px solid ${C.border}`, color: C.muted }}>{t("issues_col")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -303,7 +302,7 @@ export function Import() {
                       <td style={{ padding: "6px 8px", borderBottom: `1px solid ${C.borderMuted}`, color: C.disabled }}>{r.index + 1}</td>
                       <td style={{ padding: "6px 8px", borderBottom: `1px solid ${C.borderMuted}` }}>
                         <span style={{ color: r.valid ? (r.warnings.length ? C.warning : C.success) : C.danger }}>
-                          {r.valid ? (r.warnings.length ? "⚠" : "✓") : "✗"}
+                          {r.valid ? (r.warnings.length ? "[!]" : "[OK]") : "[X]"}
                         </span>
                       </td>
                       {["name", "caregiver_phone", "condition_label", "protocol_id", "ward", "med_name"].map(f => (
@@ -328,10 +327,10 @@ export function Import() {
                 </div>
               )}
               <Button onClick={doImport} disabled={busy || errorCount > 0}>
-                {busy ? "importing…" : `[ import ${validCount} patients ]`}
+                {busy ? t("importing") : `[ ${t("import_patients_btn")} ${validCount} ${t("patients_word")} ]`}
               </Button>
               <Button variant="ghost" onClick={() => { setStep(1); setFileId(null); }}>
-                [ start over ]
+                {t("start_over")}
               </Button>
             </div>
           </Panel>
@@ -342,22 +341,22 @@ export function Import() {
       {step === 3 && result && (
         <Panel>
           <div style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: 12 }}>
-            import complete
+            {t("import_complete")}
           </div>
           <div style={{ display: "flex", gap: 24, marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: "1.5rem", fontWeight: 600, color: C.success }}>{result.imported}</div>
-              <div style={{ fontSize: "0.75rem", color: C.muted, textTransform: "uppercase" }}>imported</div>
+              <div style={{ fontSize: "0.75rem", color: C.muted, textTransform: "uppercase" }}>{t("imported_label")}</div>
             </div>
             <div>
               <div style={{ fontSize: "1.5rem", fontWeight: 600, color: result.skipped ? C.warning : C.disabled }}>{result.skipped}</div>
-              <div style={{ fontSize: "0.75rem", color: C.muted, textTransform: "uppercase" }}>skipped</div>
+              <div style={{ fontSize: "0.75rem", color: C.muted, textTransform: "uppercase" }}>{t("skipped_label")}</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
-            <Button onClick={() => nav("/board")}>[ view board → ]</Button>
+            <Button onClick={() => nav("/board")}>{t("view_board_btn")}</Button>
             <Button variant="ghost" onClick={() => { setStep(1); setFileId(null); setResult(null); }}>
-              [ import more ]
+              {t("import_more")}
             </Button>
           </div>
         </Panel>

@@ -23,8 +23,8 @@ class FakeTransport:
         self.actions.append(("hangup",))
 
 
-def _seed(db, *, with_antibiotic=True, protocol="wound_care") -> str:
-    u = User(hospital_code="KA-DIST-01", username="u", password_hash="x",
+def _seed(db, *, protocol="wound_care", username="u") -> str:
+    u = User(hospital_code="KA-DIST-01", username=username, password_hash="x",
              display_name="U")
     db.add(u); db.commit(); db.refresh(u)
     p = Patient(hospital_code="KA-DIST-01", name="Lakshmamma", age=58,
@@ -35,11 +35,9 @@ def _seed(db, *, with_antibiotic=True, protocol="wound_care") -> str:
                    protocol_id=protocol, condition_label="Post-op",
                    discharge_date="2026-07-25")
     db.add(e); db.commit(); db.refresh(e)
-    if with_antibiotic:
-        db.add(EnrollmentMed(enrollment_id=e.id, med_name="Amoxiclav",
-                             med_type="antibiotic", aware_category="Watch",
-                             course_days=5, doses_per_day=2))
-        db.commit()
+    db.add(EnrollmentMed(enrollment_id=e.id, med_name="Amoxiclav",
+                         med_type="antibiotic", doses_per_day=2))
+    db.commit()
     c = FollowupCall(hospital_code="KA-DIST-01", enrollment_id=e.id,
                      day_index=1, scheduled_at=now_utc())
     db.add(c); db.commit(); db.refresh(c)
@@ -54,8 +52,8 @@ def _last_expect(t: FakeTransport) -> str | None:
 
 
 # ── tests ───────────────────────────────────────────────────────────────────
-def test_green_path_with_antibiotic(db):
-    cid = _seed(db, with_antibiotic=True)
+def test_green_path(db):
+    cid = _seed(db)
     t = FakeTransport()
     engine.start_call(db, cid, t)
     assert _last_expect(t) == "confirm_family"
@@ -64,33 +62,13 @@ def test_green_path_with_antibiotic(db):
     engine.handle_digit(db, cid, "1", t)   # wound fine
     assert _last_expect(t) == "q_meds_today"
     engine.handle_digit(db, cid, "1", t)   # meds fine
-    assert _last_expect(t) == "q_pillcount"
-    engine.handle_digit(db, cid, "1", t)  # few pills left
-    # edu + closing play then hangup
-    assert ("play", "edu_amr") in t.actions
+    # closing play then hangup
     assert ("play", "closing") in t.actions
     assert t.actions[-1] == ("hangup",)
     call = db.get(FollowupCall, cid)
     assert call.status == "completed"
     assert call.risk_level == "green"
-    assert db.query(CallResponse).count() == 4
-
-
-def test_pillcount_skipped_without_antibiotic(db):
-    cid = _seed(db, with_antibiotic=False)
-    t = FakeTransport()
-    engine.start_call(db, cid, t)
-    engine.handle_digit(db, cid, "1", t)   # family
-    engine.handle_digit(db, cid, "1", t)   # wound
-    engine.handle_digit(db, cid, "1", t)  # meds → skips q_pillcount → edu+closing+hangup
-    assert ("play", "edu_amr") in t.actions
-    assert ("play", "closing") in t.actions
-    assert t.actions[-1] == ("hangup",)
-    # q_pillcount was skipped: 3 responses only (family, wound, meds)
     assert db.query(CallResponse).count() == 3
-    assert db.query(CallResponse).filter(CallResponse.node_id == "q_pillcount").count() == 0
-    call = db.get(FollowupCall, cid)
-    assert call.status == "completed" and call.risk_level == "green"
 
 
 def test_red_path_creates_escalation(db):
@@ -118,7 +96,6 @@ def test_yellow_path(db):
     engine.handle_digit(db, cid, "2", t)  # wound pain → yellow
     assert ("play", "counsel_yellow") in t.actions
     engine.handle_digit(db, cid, "1", t)  # meds ok
-    engine.handle_digit(db, cid, "1", t)  # pillcount ok
     call = db.get(FollowupCall, cid)
     assert call.risk_level == "yellow"
     assert call.status == "completed"
@@ -165,3 +142,95 @@ def test_red_hook_invoked_on_red(db):
         assert len(seen) == 1
     finally:
         engine._red_hooks.clear()
+
+
+def test_fever_viral_path(db):
+    cid = _seed(db, protocol="fever_viral")
+    t = FakeTransport()
+    engine.start_call(db, cid, t)
+    assert _last_expect(t) == "confirm_family"
+    engine.handle_digit(db, cid, "1", t)   # family yes
+    assert _last_expect(t) == "q_fever"
+    engine.handle_digit(db, cid, "1", t)   # no fever
+    assert _last_expect(t) == "q_breath"
+    engine.handle_digit(db, cid, "1", t)   # no breathlessness
+    assert ("play", "closing") in t.actions
+    assert t.actions[-1] == ("hangup",)
+    call = db.get(FollowupCall, cid)
+    assert call.status == "completed"
+    assert call.risk_level == "green"
+
+
+def test_antibiotic_course_path(db):
+    cid = _seed(db, protocol="antibiotic_course")
+    t = FakeTransport()
+    engine.start_call(db, cid, t)
+    engine.handle_digit(db, cid, "1", t)   # family yes
+    assert _last_expect(t) == "q_symptom_course"
+    engine.handle_digit(db, cid, "1", t)   # better
+    assert _last_expect(t) == "q_meds_today"
+    engine.handle_digit(db, cid, "1", t)   # meds ok
+    # T3: new pill-count question (only on antibiotic_course)
+    assert _last_expect(t) == "q_pillcount_remaining"
+    engine.handle_digit(db, cid, "1", t)   # 0-3 remaining → adherent
+    assert ("play", "closing") in t.actions
+    assert t.actions[-1] == ("hangup",)
+    call = db.get(FollowupCall, cid)
+    assert call.status == "completed"
+    assert call.risk_level == "green"
+
+
+def test_antibiotic_pillcount_forces_red_on_last_day(db):
+    """T3: on the last scheduled day of an antibiotic protocol, '8+ remaining'
+    forces red (J5 — the patient didn't finish the course)."""
+    from app.models import FollowupCall
+    cid = _seed(db, protocol="antibiotic_course")
+    # Move the call to the last scheduled day (Day 7 for antibiotic_course)
+    call = db.get(FollowupCall, cid)
+    call.day_index = 7   # max(schedule_days) for antibiotic_course
+    db.commit()
+    t = FakeTransport()
+    engine.start_call(db, cid, t)
+    engine.handle_digit(db, cid, "1", t)   # family yes
+    engine.handle_digit(db, cid, "1", t)   # symptoms better
+    engine.handle_digit(db, cid, "1", t)   # meds ok
+    # pillcount = 3 (8+ remaining), on the last day → forced red
+    engine.handle_digit(db, cid, "3", t)
+    assert ("play", "closing") in t.actions
+    db.refresh(call)
+    assert call.status == "completed"
+    assert call.risk_level == "red"
+    assert any("8+" in r for r in json.loads(call.risk_reasons))
+
+
+def test_antibiotic_pillcount_score_alone_yellow_then_pillcount_pushes_red(db):
+    """On an early day, score 2 (4-7 remaining) + 0 = yellow, but the
+    forced-red override on the LAST day bumps to red."""
+    from app.models import FollowupCall
+    # First call: day 1, partial adherence (4-7) — should be yellow
+    cid = _seed(db, protocol="antibiotic_course", username="u_pillcount_early")
+    t1 = FakeTransport()
+    engine.start_call(db, cid, t1)
+    engine.handle_digit(db, cid, "1", t1)
+    engine.handle_digit(db, cid, "1", t1)  # better
+    engine.handle_digit(db, cid, "1", t1)  # meds ok
+    engine.handle_digit(db, cid, "2", t1)  # 4-7 remaining → score 2
+    c1 = db.get(FollowupCall, cid)
+    assert c1.risk_level == "yellow"
+    assert c1.risk_score == 2
+
+    # Second call: day 7 (last), 4-7 remaining — would be yellow without the
+    # override (score 2), but the T3 rule forces red.
+    cid2 = _seed(db, protocol="antibiotic_course", username="u_pillcount_last")
+    call2 = db.get(FollowupCall, cid2)
+    call2.day_index = 7
+    db.commit()
+    t2 = FakeTransport()
+    engine.start_call(db, cid2, t2)
+    engine.handle_digit(db, cid2, "1", t2)
+    engine.handle_digit(db, cid2, "1", t2)
+    engine.handle_digit(db, cid2, "1", t2)
+    engine.handle_digit(db, cid2, "2", t2)  # 4-7 remaining on last day
+    db.refresh(call2)
+    assert call2.risk_level == "red"   # forced by T3
+    assert any("4-7" in r for r in json.loads(call2.risk_reasons))

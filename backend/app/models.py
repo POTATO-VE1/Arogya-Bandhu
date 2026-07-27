@@ -10,6 +10,26 @@ def _uid() -> str:
     return uuid.uuid4().hex
 
 
+class Hospital(Base):
+    """A first-class hospital entity. A single deploy can serve many hospitals
+    in one SQLite file, each with their own staff, patients, escalations.
+
+    The hospital_code is the existing tenant discriminator on every
+    patient/enrollment/call row — backwards compatible (no migration needed
+    for existing data; the seed step backfills a default row).
+    """
+    __tablename__ = "hospitals"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=_uid)
+    code: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    district: Mapped[str | None] = mapped_column(Text, nullable=True)
+    state: Mapped[str | None] = mapped_column(Text, nullable=True)
+    contact_phone: Mapped[str | None] = mapped_column(Text, nullable=True)
+    active: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -19,6 +39,7 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     display_name: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(Text, nullable=False, default="staff")
+    ward: Mapped[str | None] = mapped_column(Text, nullable=True)  # ward assignment for nurse/staff
     created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
 
 
@@ -31,6 +52,11 @@ class Patient(Base):
     age: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sex: Mapped[str | None] = mapped_column(Text, nullable=True)
     abha_number: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # ABHA verification status (set when /api/abdm/verify-abha returns
+    # verified=True). Used by the FHIR export (verifiable provenance)
+    # and by the consent trail.
+    abha_verified: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    abha_verified_at: Mapped[str | None] = mapped_column(Text, nullable=True)
     caregiver_name: Mapped[str] = mapped_column(Text, nullable=False)
     caregiver_phone: Mapped[str] = mapped_column(Text, nullable=False)
     consent_at: Mapped[str] = mapped_column(Text, nullable=False)
@@ -53,6 +79,8 @@ class Enrollment(Base):
     status: Mapped[str] = mapped_column(Text, nullable=False, default="active")
     number_verified: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     sheet_instructions: Mapped[str | None] = mapped_column(Text, nullable=True)
+    outcome: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(Text, ForeignKey("users.id"), nullable=True)
     created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
 
     patient: Mapped["Patient"] = relationship(back_populates="enrollments")
@@ -76,8 +104,6 @@ class EnrollmentMed(Base):
     )
     med_name: Mapped[str] = mapped_column(Text, nullable=False)
     med_type: Mapped[str] = mapped_column(Text, nullable=False, default="other")
-    aware_category: Mapped[str | None] = mapped_column(Text, nullable=True)
-    course_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     doses_per_day: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
 
     enrollment: Mapped["Enrollment"] = relationship(back_populates="meds")
@@ -106,6 +132,10 @@ class FollowupCall(Base):
     risk_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
     risk_reasons: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_sec: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Which Twilio account placed the call (multi-account rotation). NULL
+    # = scheduler hasn't placed it yet, or single-account legacy.
+    account_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    triggered_by: Mapped[str | None] = mapped_column(Text, ForeignKey("users.id"), nullable=True)  # null = system/scheduler
 
     enrollment: Mapped["Enrollment"] = relationship(back_populates="calls")
     responses: Mapped[list["CallResponse"]] = relationship(
@@ -164,3 +194,42 @@ class AuditLog(Base):
     entity_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     meta: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
+
+
+class TelegramSession(Base):
+    __tablename__ = "telegram_sessions"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=_uid)
+    telegram_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
+    phone: Mapped[str | None] = mapped_column(Text, nullable=True)
+    patient_id: Mapped[str | None] = mapped_column(Text, ForeignKey("patients.id"), nullable=True)
+    is_verified: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_staff: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_admin: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    auth_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    preferred_lang: Mapped[str] = mapped_column(Text, nullable=False, default="en")
+    diet_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    google_fit_consent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    current_step: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
+
+
+class PendingNotification(Base):
+    """T12 (docs/09_PLAN.md): DB-backed retry queue for escalation
+    notifications. Telegram is the primary channel; if the send fails, the
+    scheduler retries the send every 5 min for up to 5 attempts. After 5
+    failures the row is marked `failed` and an SSE `notification:failed`
+    event tells the dashboard."""
+    __tablename__ = "pending_notifications"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True, default=_uid)
+    hospital_code: Mapped[str] = mapped_column(Text, nullable=False)
+    kind: Mapped[str] = mapped_column(Text, nullable=False)  # 'escalation'
+    entity_id: Mapped[str] = mapped_column(Text, nullable=False)  # escalation_id
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    next_retry_at: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False, default="pending")  # 'pending' | 'sent' | 'failed'
+    created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
+    sent_at: Mapped[str | None] = mapped_column(Text, nullable=True)

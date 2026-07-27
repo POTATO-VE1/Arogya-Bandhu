@@ -141,12 +141,6 @@ class TestNormalise:
         assert importer._normalise_med_type("other") == "other"
         assert importer._normalise_med_type("random") == "other"
 
-    def test_aware(self):
-        assert importer._normalise_aware("watch") == "Watch"
-        assert importer._normalise_aware("Access") == "Access"
-        assert importer._normalise_aware("RESERVE") == "Reserve"
-        assert importer._normalise_aware("random") is None
-
 
 class TestTemplate:
     def test_generates_csv(self):

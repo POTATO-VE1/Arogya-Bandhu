@@ -1,20 +1,38 @@
 """Telegram bot — polling-based, patient + staff chat with RAG.
 
-Polls getUpdates every 5s. Handles:
-- /start — welcome
-- /help — commands
-- /verify — patient OTP verification (text code, free)
-- /staff — staff code verification
-- /status — patient info (if verified)
-- /meds — medications (if verified)
-- /ask <question> — RAG-powered answer
-- Free text — context-aware response + symptom detection → escalation
+Polls getUpdates every 5s. Features:
+- Multi-lingual (Kannada & English) response routing
+- Persistent authentication (auto-load latest patient record on restart)
+- Multi-patient resolution for shared family phone numbers
+- Structured diet collection & Google Fit integration
+- Automatic SOS & symptom escalation to live Doctor Dashboard via SSE
+
+T12 follow-ups in this file:
+- Wrapped the whole handler in a try/except so unhandled errors
+  log + send a generic "something went wrong" rather than silently
+  swallowing messages.
+- Normalize phone numbers consistently (12-digit with leading country
+  code → strip the leading 0/91 and add +91; bare 10-digit → +91).
+- Bounded the in-memory `_pending_family_selection` dict to avoid leaks.
+- `/reset` now uses `reset_session()` from sessions.py so attempts,
+  language, staff, admin flags all clear.
+- Auth-failure attempts persisted to DB so a `/reset` actually
+  resets them (previously the in-memory `attempts` would survive
+  a reset because it wasn't on the Session dataclass).
+- Active chat path now `save_session(session)` so a server restart
+  preserves the last user message in DB.
+
+Note: `graph.py` + `nodes.py` + `state.py` are a parallel
+LangGraph implementation that's not wired into this flow. They
+remain importable (so `from app.telegram.bot import poll_loop`
+keeps working) but are unused in production.
 """
 from __future__ import annotations
 
 import asyncio
 import json
 import logging
+import re
 import time
 import uuid
 from typing import Any
@@ -23,28 +41,33 @@ import httpx
 
 from app.config import settings
 from app.db import SessionLocal, now_utc
-from app.models import Enrollment, EnrollmentMed, Escalation, Patient
+from app.models import Enrollment, Escalation, FollowupCall, Patient, TelegramSession
+from app.telegram.admin_bot import (
+    handle_admin_message,
+    is_verified_admin,
+    request_admin_verify,
+    handle_contact_share,
+)
 from app.telegram.rag import ask_llm, retrieve
 from app.telegram.sessions import (
+    MAX_AUTH_ATTEMPTS,
     Session,
     check_rate_limit,
     format_time,
-    generate_otp,
+    get_patient_report_by_id,
     get_session,
-    set_otp,
-    verify_otp,
+    lookup_patients_by_phone,
+    reset_session,
+    save_session,
     verify_staff,
 )
-from app.amr_steward import confirm_meds, report_pill_count
-from app.health_fit import PatientHealthData, PatientHealthToken, PatientReport
 
 log = logging.getLogger("telegram.bot")
 
-POLL_TIMEOUT = 5  # long-poll seconds
+POLL_TIMEOUT = 5
 API = "https://api.telegram.org/bot{token}"
 
 # ── symptom detection keywords ────────────────────────────────────────────────
-# Red-flag words in English and Kannada
 SYMPTOM_KEYWORDS = {
     "critical": [
         "chest pain", "can't breathe", "cannot breathe", "unconscious", "seizure",
@@ -65,14 +88,17 @@ SYMPTOM_KEYWORDS = {
     ],
 }
 
-# ── pending OTP state (per user) ──────────────────────────────────────────────
-_pending_otp: dict[int, dict] = {}  # {telegram_id: {"phone": ..., "otp": ...}}
+MAX_FAMILY_SELECTION = 1000  # bound the in-memory pending selection
+_pending_family_selection: dict[int, list[dict]] = {}
 _pending_staff: dict[int, bool] = {}
-_pending_pill_count: dict[int, bool] = {}  # {telegram_id: True} — awaiting pill count number
+_alert_cooldown: dict[str, float] = {}
+ALERT_COOLDOWN_SECONDS = 3600
 
-# ── alert cooldown (per enrollment_id) — prevent spam ─────────────────────────
-_alert_cooldown: dict[str, float] = {}  # {enrollment_id: timestamp of last alert}
-ALERT_COOLDOWN_SECONDS = 3600  # 1 hour
+
+def _evict_family_selection_if_full() -> None:
+    if len(_pending_family_selection) > MAX_FAMILY_SELECTION:
+        for k in list(_pending_family_selection.keys())[:100]:
+            _pending_family_selection.pop(k, None)
 
 
 def _api(token: str, method: str, **kwargs) -> dict | None:
@@ -88,48 +114,26 @@ def _api(token: str, method: str, **kwargs) -> dict | None:
 
 
 def _send(token: str, chat_id: int, text: str) -> None:
-    _api(token, "sendMessage", chat_id=chat_id, text=text, disable_web_page_preview=True)
-
-
-def _lookup_patient(phone: str) -> dict | None:
-    """Look up patient by caregiver phone number."""
-    s = SessionLocal()
-    try:
-        p = s.query(Patient).filter(Patient.caregiver_phone == phone).first()
-        if not p:
-            return None
-        en = s.query(Enrollment).filter(Enrollment.patient_id == p.id).first()
-        meds = []
-        if en:
-            for m in s.query(EnrollmentMed).filter(EnrollmentMed.enrollment_id == en.id).all():
-                meds.append(f"{m.med_name} ({m.med_type}, {m.doses_per_day}x/day, {m.course_days or '?'} days)")
-
-        return {
-            "name": p.name,
-            "age": p.age,
-            "sex": p.sex,
-            "phone": p.caregiver_phone,
-            "condition": en.condition_label if en else "unknown",
-            "protocol": en.protocol_id if en else "unknown",
-            "discharge_date": en.discharge_date if en else "unknown",
-            "ward": en.ward if en else "unknown",
-            "meds": ", ".join(meds) if meds else "none prescribed",
-        }
-    except Exception as e:
-        log.warning("patient lookup failed: %s", e)
-        return None
-    finally:
-        s.close()
+    _api(token, "sendMessage", chat_id=chat_id, text=text,
+         disable_web_page_preview=True)
 
 
 def _detect_language(text: str) -> str:
-    """Simple Kannada detection — check for Kannada Unicode range."""
+    """'kn' if any Kannada Unicode char, else 'en'."""
     kannada_chars = sum(1 for c in text if "\u0C80" <= c <= "\u0CFF")
     return "kn" if kannada_chars > 0 else "en"
 
 
+def _detect_sos(text: str) -> bool:
+    t = text.lower()
+    sos_en = ["help", "sos", "emergency", "need help", "not ok", "getting worse",
+              "cant breathe", "urgent", "danger", "dying", "very sick", "call ambulance"]
+    sos_kn = ["ಸಹಾಯ", "ಅಪಾಯ", "ತುರ್ತು", "ಸಹಾಯ ಬೇಕು", "ಕೆಟ್ಟಾಗಿದೆ",
+              "ಉಸಿರಾಟ ಆಗುತ್ತಿಲ್ಲ", "ಆಸ್ಪತ್ರೆಗೆ ಕರೆಯಿರಿ"]
+    return any(w in t for w in sos_en + sos_kn)
+
+
 def _detect_symptoms(text: str) -> str | None:
-    """Detect symptom severity from text. Returns 'critical'/'high'/'medium'/None."""
     t = text.lower()
     for level in ("critical", "high", "medium"):
         for kw in SYMPTOM_KEYWORDS[level]:
@@ -138,43 +142,56 @@ def _detect_symptoms(text: str) -> str | None:
     return None
 
 
+def _normalise_phone(raw: str) -> str | None:
+    """Phone normalisation: accept '+CC...', 'CC...', '0CC...', or bare
+    10-digit. Always returns E.164 with a leading '+' or None if the input
+    doesn't look like a phone number at all."""
+    if not raw:
+        return None
+    s = re.sub(r"[\s\-\(\)]", "", raw)
+    m = re.match(r"^\+?(\d{10,15})$", s)
+    if not m:
+        return None
+    digits = m.group(1)
+    # Strip leading 0 (trunk prefix) or country code 91 if it looks like an
+    # Indian mobile without a leading +.
+    if digits.startswith("0") and len(digits) == 11:
+        digits = digits[1:]
+    if digits.startswith("91") and len(digits) == 12:
+        digits = digits[2:]
+    if len(digits) != 10:
+        return None
+    return "+91" + digits
+
+
 def _create_alert(patient_data: dict, message: str, severity: str) -> str | None:
-    """Create an escalation from a Telegram symptom report. Returns escalation_id.
-    Dedup: skips if an open escalation already exists for this enrollment,
-    or if the last alert was within ALERT_COOLDOWN_SECONDS."""
+    """Create an escalation and publish SSE event to Doctor Dashboard."""
     s = SessionLocal()
     try:
-        en = s.query(Enrollment).filter(
-            Enrollment.patient_id == s.query(Patient).filter(
-                Patient.caregiver_phone == patient_data["phone"]
-            ).first().id
-        ).first() if patient_data else None
-
+        p_id = patient_data.get("patient_id")
+        en = s.query(Enrollment).filter(Enrollment.patient_id == p_id).first() if p_id else None
         if not en:
             return None
 
-        # dedup: check for existing open escalation
         existing = s.query(Escalation).filter(
             Escalation.enrollment_id == en.id,
             Escalation.status == "open",
         ).first()
         if existing:
-            log.info("skipping alert — open escalation %s exists for enrollment %s", existing.id[:8], en.id[:8])
-            return None
+            return existing.id
 
-        # cooldown: skip if last alert was less than1 hour ago
         now = time.time()
         last_alert = _alert_cooldown.get(en.id, 0)
         if now - last_alert < ALERT_COOLDOWN_SECONDS:
-            log.info("skipping alert — cooldown active for enrollment %s", en.id[:8])
             return None
 
+        level = "red" if severity in ("critical", "high") else "yellow"
         esc = Escalation(
             id=uuid.uuid4().hex,
             hospital_code=settings.HOSPITAL_CODE,
             enrollment_id=en.id,
             call_id=None,
-            level="red" if severity in ("critical", "high") else "yellow",
+            level=level,
             reasons=json.dumps([f"Telegram symptom report ({severity}): {message[:100]}"]),
             status="open",
             created_at=now_utc(),
@@ -183,7 +200,6 @@ def _create_alert(patient_data: dict, message: str, severity: str) -> str | None
         s.commit()
         _alert_cooldown[en.id] = now
 
-        # publish SSE event so dashboard updates live
         try:
             from app.events import publish
             publish("escalation", esc.id)
@@ -200,536 +216,397 @@ def _create_alert(patient_data: dict, message: str, severity: str) -> str | None
 
 
 def _send_alert_to_group(patient_data: dict, message: str, severity: str, esc_id: str) -> None:
-    """Send symptom alert to Telegram group."""
+    """Send alert to Telegram hospital group if configured.
+
+    Security: the phone is MASKED before going out. The unmasked number
+    only ever lives in the DB behind session auth — never in a Telegram
+    group, where screenshots and forwards are uncontrolled.
+    """
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
         return
-
-    icon = {"critical": "🔴", "high": "🟠", "medium": "🟡"}.get(severity, "⚪")
-    token = settings.TELEGRAM_BOT_TOKEN
-
+    icon = {"critical": "[CRIT]", "high": "[HIGH]", "medium": "[MED]"}.get(severity, "[INFO]")
+    raw_phone = patient_data.get("phone", "")
+    masked = (f"{raw_phone[:6]}•••••{raw_phone[-3:]}"
+              if len(raw_phone) > 6 else "••••")
     text = (
         f"{icon} PATIENT ALERT — {settings.HOSPITAL_NAME}\n"
         f"Patient: {patient_data['name']} (enrollment {esc_id[:8]})\n"
         f"Severity: {severity.upper()}\n"
         f"Message: \"{message[:200]}\"\n"
         f"Condition: {patient_data['condition']}\n"
-        f"Protocol: {patient_data['protocol']}\n"
         f"Dashboard: {settings.PUBLIC_BASE_URL}/escalations\n"
-        f"Call patient: tel:{patient_data['phone']}"
+        f"Caregiver: {masked}"
     )
-    _api(token, "sendMessage", chat_id=int(chat_id), text=text, disable_web_page_preview=True)
+    _api(settings.TELEGRAM_BOT_TOKEN, "sendMessage",
+         chat_id=int(chat_id), text=text, disable_web_page_preview=True)
 
 
-# ── message handler ───────────────────────────────────────────────────────────
+# ── main message handler ──────────────────────────────────────────────────────
 
 def _handle_message(token: str, msg: dict[str, Any]) -> None:
     chat_id = msg["chat"]["id"]
     telegram_id = msg["from"]["id"]
-    text = msg.get("text", "").strip()[:1000]  # limit input length
+    raw_text = msg.get("text", "").strip()
     first_name = msg["from"].get("first_name", "")
 
-    if not text:
+    # Contact share (Telegram sends contact as a regular message with
+    # msg["contact"] = { phone_number, first_name, ... }).
+    contact = msg.get("contact")
+    if contact:
+        phone = contact.get("phone_number", "")
+        if handle_contact_share(telegram_id, phone):
+            _send(token, chat_id, "[OK] Admin verified! You can now use admin commands:\n/create, /list, /delete, /adminhelp")
+        else:
+            _send(token, chat_id, "[X] Phone number doesn't match admin access.")
         return
+
+    if not raw_text:
+        return
+    text = raw_text[:500]
 
     session = get_session(telegram_id)
+    lang = _detect_language(text)
+    session.preferred_lang = lang
 
-    # rate limit
+    # Rate limit (in-memory window)
     allowed, retry = check_rate_limit(session)
     if not allowed:
-        _send(token, chat_id, f"⏱ Rate limit hit. Try again in {format_time(retry)}.")
+        _send(token, chat_id, f"[!] Rate limit hit. Try again in {format_time(retry)}.")
         return
 
-    # ── pill count number input (stateful) ────────────────────────────────────
-    if telegram_id in _pending_pill_count:
-        del _pending_pill_count[telegram_id]
-        if not session.verified or not session.phone:
-            _send(token, chat_id, "Session expired. Send /verify to link your phone.")
-            return
-        # parse number
-        try:
-            count = int(text.strip())
-            if count < 0:
-                raise ValueError
-        except ValueError:
-            _send(token, chat_id, "Please enter a valid number (e.g., 12)")
-            return
-        msg = report_pill_count(session.phone, count)
-        _send(token, chat_id, msg)
-        return
-
-    # ── OTP verification flow (stateful) ──────────────────────────────────────
-    if telegram_id in _pending_otp:
-        pending = _pending_otp[telegram_id]
-        # only compare as OTP if we're actually awaiting an OTP (not awaiting phone)
-        if pending.get("state") == "awaiting_otp" and pending.get("otp"):
-            if text == pending["otp"]:
-                session.phone = pending["phone"]
-                session.verified = True
-                session.verified_at = time.time()
-                del _pending_otp[telegram_id]
-                _send(token, chat_id, (
-                    f"✓ Verified! Welcome, {first_name}.\n\n"
-                    "You can now ask about your medications and recovery.\n"
-                    "Try: /meds, /status, or just type a question."
-                ))
-                return
-            else:
-                # allow retry up to 3 times
-                pending["attempts"] = pending.get("attempts", 0) + 1
-                if pending["attempts"] >= 3:
-                    del _pending_otp[telegram_id]
-                    _send(token, chat_id, "✗ Too many failed attempts. Send /verify to try again.")
-                else:
-                    _send(token, chat_id, f"✗ Wrong code. Try again ({3 - pending['attempts']} attempts left).")
-                return
-        # if awaiting_phone, fall through to phone handler below
-
-    # ── staff code flow ───────────────────────────────────────────────────────
-    if telegram_id in _pending_staff:
-        if verify_staff(session, text):
-            del _pending_staff[telegram_id]
+    # ── /admin command ────────────────────────────────────────────────────
+    if text.lower().strip() == "/admin":
+        if is_verified_admin(telegram_id):
+            _send(token, chat_id, "[OK] You are already verified as admin.\n/create, /list, /delete, /adminhelp")
+        else:
+            request_admin_verify(telegram_id)
             _send(token, chat_id, (
-                "✓ Staff access granted.\n\n"
-                "Ask me about protocols, AMR guidelines, dosing, or clinical workflows.\n"
-                "Try: /ask wound care protocol, /ask AMR guidelines"
+                "[LOCK] Admin Verification Required\n\n"
+                "Please share your contact (phone number) to verify admin access.\n"
+                "Tap the button below or send /cancel to abort."
             ))
+        return
+
+    # ── Admin bot (verified only) ──────────────────────────────────────────
+    if is_verified_admin(telegram_id):
+        try:
+            if handle_admin_message(token, telegram_id, chat_id, text):
+                return
+        except Exception as e:
+            log.exception("admin bot handler failed: %s", e)
+            _send(token, chat_id, f"[X] Admin command failed: {e}")
+            return
+
+    # ── Staff access code flow ───────────────────────────────────────────
+    if telegram_id in _pending_staff:
+        if not settings.TELEGRAM_STAFF_CODE:
+            _send(token, chat_id, "[X] Staff access not configured on this deployment. Ask an admin to set TELEGRAM_STAFF_CODE.")
+        elif verify_staff(session, text):
+            del _pending_staff[telegram_id]
+            _send(token, chat_id, "[OK] Staff access granted. Ask me about protocols or clinical guidelines.")
         else:
             del _pending_staff[telegram_id]
-            _send(token, chat_id, "✗ Invalid staff code.")
+            _send(token, chat_id, "[X] Invalid staff code.")
         return
 
-    # ── commands ──────────────────────────────────────────────────────────────
+    # ── Commands ──────────────────────────────────────────────────────────
     if text.startswith("/"):
         cmd = text.split()[0].lower()
 
         if cmd == "/start":
-            _send(token, chat_id, (
-                f"Welcome to Aarogya Bandhu, {first_name}! 🏥\n\n"
-                "I help patients with recovery and staff with protocols.\n\n"
-                "Patient? Send /verify to link your phone number.\n"
-                "Staff? Send /staff to enter access code.\n\n"
-                "Commands:\n"
-                "/verify — verify as patient (code sent here)\n"
-                "/staff — verify as staff (access code)\n"
-                "/meds — see your medications\n"
-                "/status — see your patient info\n"
-                "/confirm — confirm you took your meds\n"
-                "/pills — report remaining pill count\n"
-                "/ask <question> — ask about health or protocols\n"
-                "/help — show this message\n\n"
-                "Feeling unwell? Just tell me — I'll alert the hospital team."
-            ))
+            if session.verified and session.patient_id:
+                patient = get_patient_report_by_id(session.patient_id)
+                if patient:
+                    if lang == "kn":
+                        _send(token, chat_id, (
+                            f"ನಮಸ್ಕಾರ {patient['name']}!\n\n"
+                            f"ನಿಮ್ಮ ಚೇತರಿಕೆಯ ಮಾಹಿತಿ:\n"
+                            f"[+] ಸ್ಥಿತಿ: {patient['condition']}\n"
+                            f"[R] ಔಷಧಿಗಳು: {patient['meds']}\n\n"
+                            "ನಿಮ್ಮ ಆರೋಗ್ಯ, ಆಹಾರ ಅಥವಾ ಔಷಧಿಗಳ ಬಗ್ಗೆ ಯಾವುದೇ ಪ್ರಶ್ನೆ ಇದ್ದರೆ ಇಲ್ಲಿ ಕೇಳಬಹುದು."
+                        ))
+                    else:
+                        _send(token, chat_id, (
+                            f"Welcome back, {patient['name']}!\n\n"
+                            f"Your recovery status:\n"
+                            f"[+] Condition: {patient['condition']}\n"
+                            f"[R] Prescribed Meds: {patient['meds']}\n\n"
+                            "Feel free to ask any question about your diet, medications, or recovery."
+                        ))
+                    return
+
+            session.current_step = "awaiting_phone"
+            session.auth_attempts = 0  # fresh start
+            save_session(session)
+            if lang == "kn":
+                _send(token, chat_id, (
+                    f"ಆರೋಗ್ಯ ಬಂಧುಗೆ ಸ್ವಾಗತ, {first_name}! [+]\n\n"
+                    "ನಿಮ್ಮ ವೈದ್ಯಕೀಯ ವರದಿ ಮತ್ತು ಔಷಧಿಗಳನ್ನು ಪಡೆಯಲು, ದಯವಿಟ್ಟು ನಿಮ್ಮ ನೋಂದಾಯಿತ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ:\n"
+                    "ಉದಾಹರಣೆಗೆ: +919353808767"
+                ))
+            else:
+                _send(token, chat_id, (
+                    f"Welcome to Aarogya Bandhu, {first_name}! [+]\n\n"
+                    "To load your medical report and prescriptions, please enter your registered phone number:\n"
+                    "Example: +919353808767"
+                ))
             return
 
         if cmd == "/help":
-            _send(token, chat_id, (
-                "Commands:\n"
-                "/verify — verify your phone number (code sent here)\n"
-                "/staff — enter staff access code\n"
-                "/meds — see your medications\n"
-                "/status — see your patient info\n"
-                "/confirm — confirm you took your meds today\n"
-                "/pills — report remaining pill count\n"
-                "/connect_device — link your smart watch/fitness band\n"
-                "/health — see your health data from connected device\n"
-                "/disconnect — unlink your health device\n"
-                "/ask <question> — ask about health, medications, or protocols\n\n"
-                "Or just type a question in Kannada or English!\n\n"
-                "If you feel unwell, just tell me — I'll alert the hospital team."
-            ))
-            return
-
-        if cmd == "/verify":
-            _send(token, chat_id, (
-                "📱 Please enter your phone number in E.164 format:\n"
-                "Example: +919353808767"
-            ))
-            # set state to expect phone number
-            _pending_otp[telegram_id] = {"state": "awaiting_phone", "otp": None}
+            if lang == "kn":
+                _send(token, chat_id, (
+                    "ಸಹಾಯ ಮಾರ್ಗದರ್ಶಿ [+]:\n"
+                    "/start — ಲಾಗಿನ್ / ಪುನಃ ಪ್ರಾರಂಭಿಸಿ\n"
+                    "/status — ನಿಮ್ಮ ರೋಗಿ ಮಾಹಿತಿ\n"
+                    "/diet — ಆಹಾರ ಪದ್ಧತಿ ವಿವರ ನವೀಕರಿಸಿ\n"
+                    "/connect_device — ಫಿಟ್‌ನೆಸ್ ಸಾಧನ ಸಂಪರ್ಕಿಸಿ\n"
+                    "/staff — ಸಿಬ್ಬಂದಿ ಕೋಡ್ ಪರಿಶೀಲಿಸಿ\n"
+                    "/reset — ಲಾಗೌಟ್ ಮಾಡಿ ಪುನಃ ನಮೂದಿಸಿ\n\n"
+                    "ಯಾವುದೇ ಪ್ರಶ್ನೆಯನ್ನು ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ ನೇರವಾಗಿ ಟೈಪ್ ಮಾಡಿ!"
+                ))
+            else:
+                _send(token, chat_id, (
+                    "Help Guide [+]:\n"
+                    "/start — Sign in or restart\n"
+                    "/status — View patient summary\n"
+                    "/diet — Update diet preferences\n"
+                    "/connect_device — Connect smart fitness device\n"
+                    "/staff — Enter staff access code\n"
+                    "/reset — Reset authentication session\n"
+                    "/cancel — Cancel the current operation\n\n"
+                    "Or just type any question in English or Kannada!"
+                ))
             return
 
         if cmd == "/staff":
-            _send(token, chat_id, "🔑 Enter staff access code:")
+            if not settings.TELEGRAM_STAFF_CODE:
+                _send(token, chat_id, "[X] Staff access not configured on this deployment. Ask an admin to set TELEGRAM_STAFF_CODE.")
+                return
+            _send(token, chat_id, "[K] Enter staff access code:")
             _pending_staff[telegram_id] = True
             return
 
-        if cmd == "/meds":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
-                return
-            patient = _lookup_patient(session.phone)
-            if not patient:
-                _send(token, chat_id, "No patient found for your phone number.")
-                return
-            _send(token, chat_id, (
-                f"📋 Medications for {patient['name']}:\n\n"
-                f"{patient['meds']}\n\n"
-                f"Condition: {patient['condition']}\n"
-                f"Protocol: {patient['protocol']}\n"
-                f"Discharge: {patient['discharge_date']}"
-            ))
+        if cmd == "/reset":
+            reset_session(session)
+            _send(token, chat_id, "Session reset. Send /start to sign in again.")
             return
 
-        if cmd == "/confirm":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
-                return
-            msg = confirm_meds(session.phone)
-            _send(token, chat_id, msg)
-            return
-
-        if cmd == "/pills":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
-                return
-            _pending_pill_count[telegram_id] = True
-            _send(token, chat_id, "🔢 ಉಳಿದ ಮಾತ್ರೆಗಳ ಸಂಖ್ಯೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ (ಉದಾ: 12)")
+        if cmd == "/diet":
+            session.current_step = "collecting_diet"
+            save_session(session)
+            if lang == "kn":
+                _send(token, chat_id, "[=] ದಯವಿಟ್ಟು ನಿಮ್ಮ ಆಹಾರ ಪದ್ಧತಿ ಅಥವಾ ಆಹಾರ ನಿಯಮಗಳನ್ನು ಟೈಪ್ ಮಾಡಿ (ಉದಾ: ಸಸ್ಯಾಹಾರಿ, ಶಕ್ಕರೆ ಕಾಯಿಲೆ ಆಹಾರ, ಕಡಿಮೆ ಉಪ್ಪು):")
+            else:
+                _send(token, chat_id, "[=] Please share your diet preferences or restrictions (e.g., Vegetarian, Diabetic diet, Low salt):")
             return
 
         if cmd == "/status":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
+            if not session.verified or not session.patient_id:
+                _send(token, chat_id, "Please share your registered phone number first.")
                 return
-            patient = _lookup_patient(session.phone)
+            patient = get_patient_report_by_id(session.patient_id)
             if not patient:
-                _send(token, chat_id, "No patient found for your phone number.")
+                _send(token, chat_id, "No patient found.")
                 return
             _send(token, chat_id, (
-                f"📊 Patient Info:\n\n"
-                f"Name: {patient['name']}\n"
-                f"Age: {patient['age'] or '—'} · Sex: {patient['sex'] or '—'}\n"
+                f"[#] Patient Summary:\n"
+                f"Name: {patient['name']} ({patient['age']}y/{patient['sex']})\n"
                 f"Condition: {patient['condition']}\n"
-                f"Protocol: {patient['protocol']}\n"
                 f"Ward: {patient['ward']}\n"
-                f"Discharge: {patient['discharge_date']}"
+                f"Meds: {patient['meds']}\n"
+                f"Diet Info: {session.diet_info or 'Not recorded'}"
             ))
             return
-
-        if cmd == "/ask":
-            query = text[len("/ask"):].strip()
-            if not query:
-                _send(token, chat_id, "Usage: /ask <your question>")
-                return
-            # fall through to RAG below
-            text = query
 
         if cmd == "/connect_device":
             if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
+                _send(token, chat_id, "Please verify your phone number first.")
                 return
-            patient = _lookup_patient(session.phone)
-            if not patient:
-                _send(token, chat_id, "No patient found for your phone number.")
-                return
-            # Check if already connected
-            s = SessionLocal()
-            try:
-                p = s.query(Patient).filter(Patient.caregiver_phone == session.phone).first()
-                if p:
-                    existing = s.query(PatientHealthToken).filter(
-                        PatientHealthToken.patient_id == p.id
-                    ).first()
-                    if existing:
-                        _send(token, chat_id, (
-                            "✓ Your device is already connected!\n\n"
-                            "Last synced: " + (existing.last_synced_at or "never") + "\n\n"
-                            "Send /health to see your data.\n"
-                            "Send /disconnect to unlink."
-                        ))
-                        return
-            finally:
-                s.close()
-            # Check if Google Fit is configured
-            if not settings.GOOGLE_FIT_CLIENT_ID:
-                _send(token, chat_id, (
-                    "📱 Health device integration is not yet configured.\n"
-                    "The hospital admin needs to set up Google Fit OAuth.\n\n"
-                    "For now, you can still use /meds, /confirm, /pills, and /ask."
-                ))
-                return
-            # Send OAuth link
-            from app.routers.health import get_pending_connection
-            base = settings.PUBLIC_BASE_URL or "http://localhost:8000"
-            oauth_url = f"{base}/api/health/fit/authorize?tgid={telegram_id}"
+            oauth_url = f"{settings.PUBLIC_BASE_URL or 'http://localhost:8000'}/api/health/fit/authorize?tgid={telegram_id}"
             _send(token, chat_id, (
-                "📱 Connect Your Health Device\n\n"
-                "Link your smart watch or fitness band (Mi Band, Amazfit, "
-                "Samsung, Noise, etc.) to share health data with your care team.\n\n"
-                "Supported devices: Any device that syncs with Google Fit "
-                "(most Android fitness trackers do).\n\n"
-                "1. Tap the link below to authorize\n"
-                "2. Sign in with your Google account\n"
-                "3. Allow access to health data\n"
-                "4. Come back here and send /connect_device again\n\n"
-                f"🔗 Authorize: {oauth_url}\n\n"
-                "Your data is encrypted and only visible to your care team."
+                "[M] Connect Google Fit / Smart Watch:\n"
+                f"1. Tap link to authorize: {oauth_url}\n"
+                "2. Complete Google login and return to chat.\n"
+                "3. You'll get a confirmation here once linked."
             ))
             return
 
-        if cmd == "/health":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
-                return
-            # First check if there's a pending OAuth connection to link
-            from app.routers.health import get_pending_connection
-            pending = get_pending_connection(telegram_id)
-            if pending:
-                # Link the connection to the patient
-                s = SessionLocal()
-                try:
-                    p = s.query(Patient).filter(Patient.caregiver_phone == session.phone).first()
-                    if p:
-                        # Store the tokens
-                        token_row = PatientHealthToken(
-                            id=uuid.uuid4().hex,
-                            patient_id=p.id,
-                            hospital_code=settings.HOSPITAL_CODE,
-                            provider="google_fit",
-                            access_token=pending["access_token"],
-                            refresh_token=pending["refresh_token"],
-                            token_expiry=pending["expiry"],
-                            scope=pending["scope"],
-                            connected_at=pending["connected_at"],
-                        )
-                        s.add(token_row)
-                        s.commit()
-                        _send(token, chat_id, (
-                            "✓ Device linked successfully!\n\n"
-                            "Fetching your health data now..."
-                        ))
-                        # Now fetch initial data
-                        _fetch_and_send_health(token, chat_id, session.phone, telegram_id)
-                        return
-                    else:
-                        _send(token, chat_id, "No patient found for your phone number.")
-                        return
-                finally:
-                    s.close()
-
-            # No pending connection — show existing health data
-            _fetch_and_send_health(token, chat_id, session.phone, telegram_id)
+        if cmd == "/skip":
+            session.current_step = "active"
+            save_session(session)
+            _send(token, chat_id, "Setup complete! You can now chat anytime.")
             return
 
-        if cmd == "/disconnect":
-            if not session.verified or not session.phone:
-                _send(token, chat_id, "Please verify first. Send /verify to link your phone.")
-                return
-            s = SessionLocal()
-            try:
-                p = s.query(Patient).filter(Patient.caregiver_phone == session.phone).first()
-                if p:
-                    deleted = s.query(PatientHealthToken).filter(
-                        PatientHealthToken.patient_id == p.id
-                    ).delete()
-                    s.commit()
-                    if deleted:
-                        _send(token, chat_id, "✓ Health device disconnected. Your data has been removed.")
-                    else:
-                        _send(token, chat_id, "No device was connected.")
+    # ── Imperative state machine ──────────────────────────────────────────
+
+    # Step: multi-patient family member selection
+    if session.current_step == "selecting_family_member" and telegram_id in _pending_family_selection:
+        matches = _pending_family_selection[telegram_id]
+        try:
+            choice = int(text.strip())
+            if 1 <= choice <= len(matches):
+                selected = matches[choice - 1]
+                session.patient_id = selected["patient_id"]
+                session.verified = True
+                session.current_step = "collecting_diet"
+                save_session(session)
+                del _pending_family_selection[telegram_id]
+
+                if lang == "kn":
+                    _send(token, chat_id, (
+                        f"[OK] {selected['name']} ಅವರ ಖಾತೆಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ!\n\n"
+                        "ಉತ್ತಮ ಚೇತರಿಕೆಗೆ ನಿಮ್ಮ ದಿನನಿತ್ಯದ ಆಹಾರ ಪದ್ಧತಿಯನ್ನು ತಿಳಿಸಿ (ಉದಾ: ಸಸ್ಯಾಹಾರಿ, ಮಧುಮೇಹ ಆಹಾರ, ಕಡಿಮೆ ಖಾರ):"
+                    ))
                 else:
-                    _send(token, chat_id, "No patient found for your phone number.")
-            finally:
-                s.close()
-            return
-        else:
-            _send(token, chat_id, f"Unknown command: {cmd}. Send /help for available commands.")
+                    _send(token, chat_id, (
+                        f"[OK] Linked to {selected['name']}!\n\n"
+                        "Please share your daily diet preferences or restrictions (e.g., Vegetarian, Diabetic diet, Low salt):"
+                    ))
+                return
+            else:
+                _send(token, chat_id, f"Please enter a valid choice between 1 and {len(matches)}.")
+                return
+        except ValueError:
+            _send(token, chat_id, f"Please enter a valid number (1-{len(matches)}).")
             return
 
-    # ── handle phone number input (from /verify flow) ─────────────────────────
-    if telegram_id in _pending_otp and _pending_otp[telegram_id].get("state") == "awaiting_phone":
-        phone = text.strip()
-        if not phone.startswith("+") or len(phone) < 10:
-            _send(token, chat_id, "Invalid phone format. Please use E.164: +91XXXXXXXXXX")
-            return
-        # check if patient exists
-        patient = _lookup_patient(phone)
-        if not patient:
+    # Step: awaiting phone (or implicit phone-in-text entry)
+    if session.current_step == "awaiting_phone" or (
+            not session.verified and re.search(r"\+?\d{10,12}", text)):
+        phone = _normalise_phone(text)
+        if phone:
+            # Persist + check lockout BEFORE we send a misleading "no match"
+            # message that could be used to enumerate numbers.
+            session.auth_attempts += 1
+            if session.auth_attempts > MAX_AUTH_ATTEMPTS:
+                reset_session(session)
+                _send(token, chat_id,
+                      "[X] Too many failed attempts. Session reset. Send /start to try again.")
+                return
+
+            matches = lookup_patients_by_phone(phone)
+            if len(matches) == 0:
+                save_session(session)
+                if lang == "kn":
+                    _send(token, chat_id, f"[X] ಈ ಫೋನ್ ಸಂಖ್ಯೆಗೆ ಆಸ್ಪತ್ರೆ ದಾಖಲೆ ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ನೋಂದಾಯಿತ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ. ({session.auth_attempts}/{MAX_AUTH_ATTEMPTS} ಪ್ರಯತ್ನಗಳು)")
+                else:
+                    _send(token, chat_id, f"[X] No patient record found for this phone number. Please check and try again. ({session.auth_attempts}/{MAX_AUTH_ATTEMPTS} attempts)")
+                return
+            elif len(matches) == 1:
+                selected = matches[0]
+                session.phone = phone
+                session.patient_id = selected["patient_id"]
+                session.verified = True
+                session.auth_attempts = 0
+                session.current_step = "collecting_diet"
+                save_session(session)
+
+                if lang == "kn":
+                    _send(token, chat_id, (
+                        f"[OK] ಪರಿಶೀಲಿಸಲಾಗಿದೆ! ನಮಸ್ಕಾರ {selected['name']}.\n\n"
+                        "ಉತ್ತಮ ಚೇತರಿಕೆಗೆ ನಿಮ್ಮ ದಿನನಿತ್ಯದ ಆಹಾರ ಪದ್ಧತಿಯನ್ನು ತಿಳಿಸಿ (ಉದಾ: ಸಸ್ಯಾಹಾರಿ, ಡಯಾಬಿಟಿಸ್, ಕಡಿಮೆ ಉಪ್ಪು):"
+                    ))
+                else:
+                    _send(token, chat_id, (
+                        f"[OK] Verified! Welcome, {selected['name']}.\n\n"
+                        "Please share your daily diet preferences or restrictions (e.g., Vegetarian, Diabetic diet, Low salt):"
+                    ))
+                return
+            else:
+                # multiple family members
+                _pending_family_selection[telegram_id] = matches
+                _evict_family_selection_if_full()
+                session.phone = phone
+                session.current_step = "selecting_family_member"
+                session.auth_attempts = 0
+                save_session(session)
+
+                lines = []
+                if lang == "kn":
+                    lines.append("[M] ಈ ಫೋನ್ ಸಂಖ್ಯೆಗೆ 1 ಕ್ಕಿಂತ ಹೆಚ್ಚು ರೋಗಿಗಳು ನೋಂದಾಯಿಸಲ್ಪಟ್ಟಿದ್ದಾರೆ. ಯಾರು ಚಾಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆಂದು ಆಯ್ಕೆ ಮಾಡಿ:\n")
+                    for idx, p_item in enumerate(matches, 1):
+                        lines.append(f"{idx}. {p_item['name']} (ವಯಸ್ಸು {p_item['age'] or '—'})")
+                    lines.append("\nಸಂಖ್ಯೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ (ಉದಾ: 1):")
+                else:
+                    lines.append("[M] Multiple patients found for this mobile number. Please select who is using the chat:\n")
+                    for idx, p_item in enumerate(matches, 1):
+                        lines.append(f"{idx}. {p_item['name']} (Age {p_item['age'] or '—'})")
+                    lines.append("\nType the option number (e.g., 1):")
+                _send(token, chat_id, "\n".join(lines))
+                return
+
+    # Step: collecting diet
+    if session.current_step == "collecting_diet":
+        session.diet_info = text.strip()
+        session.current_step = "active"
+        save_session(session)
+
+        if lang == "kn":
             _send(token, chat_id, (
-                "✗ No patient found with this phone number.\n"
-                "Please check and try again, or contact the hospital."
+                "[OK] ಆಹಾರದ ವಿವರಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ! [=]\n\n"
+                "ನಿಮ್ಮ ಚೇತರಿಕೆ, ಔಷಧಿ ಮತ್ತು ದಿನನಿತ್ಯದ ಸಲಹೆಗಳನ್ನು ಈಗ ಕೇಳಬಹುದು."
             ))
-            del _pending_otp[telegram_id]
-            return
-        # generate OTP and call
-        otp = generate_otp()
-        _pending_otp[telegram_id] = {"phone": phone, "otp": otp, "attempts": 0, "state": "awaiting_otp"}
-        # call via Twilio
-        _call_otp(token, chat_id, phone, otp)
+        else:
+            _send(token, chat_id, (
+                "[OK] Diet info saved! [=]\n\n"
+                "Setup is complete. Feel free to ask any question about your recovery or medications."
+            ))
         return
 
-    # ── RAG: free text or /ask ────────────────────────────────────────────────
+    # ── Active chat & RAG ─────────────────────────────────────────────────
     patient_ctx = None
-    if session.verified and session.phone:
-        patient_ctx = _lookup_patient(session.phone)
+    if session.verified and session.patient_id:
+        patient_ctx = get_patient_report_by_id(session.patient_id)
+        if patient_ctx and session.diet_info:
+            patient_ctx["diet_info"] = session.diet_info
 
-    # symptom detection for verified patients
+    # Persist a marker that this user is in active mode (helps /reset
+    # clear it correctly and gives the dashboard a last-active timestamp).
+    if session.current_step != "active" and patient_ctx:
+        session.current_step = "active"
+        save_session(session)
+
     if patient_ctx:
+        if _detect_sos(text):
+            esc_id = _create_alert(patient_ctx, text, "critical")
+            if esc_id:
+                _send_alert_to_group(patient_ctx, text, "critical", esc_id)
+                if lang == "kn":
+                    _send(token, chat_id, (
+                        "[!] SOS ಸ್ವೀಕರಿಸಲಾಗಿದೆ — ನಿಮ್ಮ ತುರ್ತು ಸಹಾಯ ವಿನಂತಿಯನ್ನು ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ತಕ್ಷಣ ರವಾನಿಸಲಾಗಿದೆ.\n"
+                        "ಜೀವಕ್ಕೆ ಅಪಾಯಕಾರಿ ಸಂದರ್ಭದಲ್ಲಿ, 104 ಅಥವಾ 108 ಗೆ ಕರೆ ಮಾಡಿ!"
+                    ))
+                else:
+                    _send(token, chat_id, (
+                        "[!] SOS RECEIVED — Your emergency alert has been sent to the doctor's dashboard immediately.\n"
+                        "For life-threatening emergencies, call 104 or 108 NOW!"
+                    ))
+                return
+
         severity = _detect_symptoms(text)
-        if severity:
+        if severity in ("critical", "high"):
             esc_id = _create_alert(patient_ctx, text, severity)
             if esc_id:
                 _send_alert_to_group(patient_ctx, text, severity, esc_id)
-                icon = {"critical": "🔴", "high": "🟠", "medium": "🟡"}.get(severity, "⚪")
-                _send(token, chat_id, (
-                    f"{icon} Your symptom has been reported to the hospital team.\n"
-                    f"Severity: {severity.upper()}\n"
-                    f"Reference: #{esc_id[:8]}\n\n"
-                    f"If this is an emergency, call 104 or 108 immediately.\n"
-                    f"A nurse will follow up with you shortly."
-                ))
-                # still send RAG response
+                if lang == "kn":
+                    _send(token, chat_id, (
+                        f"[!] ನಿಮ್ಮ ಲಕ್ಷಣವನ್ನು ({severity.upper()}) ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ವರದಿ ಮಾಡಲಾಗಿದೆ.\n"
+                        "ವೈದ್ಯರು ಪರಿಶೀಲಿಸುತ್ತಿದ್ದಾರೆ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104/108 ಗೆ ಕರೆ ಮಾಡಿ."
+                    ))
+                else:
+                    _send(token, chat_id, (
+                        f"[!] Your symptom ({severity.upper()}) has been forwarded to the doctor's dashboard.\n"
+                        "The medical team is reviewing your report. For emergencies call 104 or 108."
+                    ))
                 context = retrieve(text, patient_ctx)
-                rag_response = ask_llm(text, context, patient_ctx, is_staff=session.staff)
-                _send(token, chat_id, rag_response)
+                rag_resp = ask_llm(text, context, patient_ctx, is_staff=session.staff, lang=lang)
+                _send(token, chat_id, rag_resp)
                 return
 
     context = retrieve(text, patient_ctx)
-    response = ask_llm(text, context, patient_ctx, is_staff=session.staff)
+    response = ask_llm(text, context, patient_ctx, is_staff=session.staff, lang=lang)
     _send(token, chat_id, response)
-
-
-def _call_otp(token: str, chat_id: int, phone: str, otp: str) -> None:
-    """Send OTP as text in Telegram (free, no Twilio cost)."""
-    _send(token, chat_id, (
-        f"🔑 Your verification code: {otp}\n\n"
-        f"Enter this code to verify your phone number."
-    ))
-
-
-def _fetch_and_send_health(token: str, chat_id: int, phone: str, telegram_id: int) -> None:
-    """Fetch health data from Google Fit and send summary to patient."""
-    from datetime import datetime, timedelta, timezone
-    from app.health_fit.client import fetch_all_metrics
-    from app.health_fit.analytics import compute_health_summary
-    from app.routers.health import _decrypt, _get_fernet
-
-    s = SessionLocal()
-    try:
-        p = s.query(Patient).filter(Patient.caregiver_phone == phone).first()
-        if not p:
-            _send(token, chat_id, "No patient found.")
-            return
-
-        token_row = s.query(PatientHealthToken).filter(
-            PatientHealthToken.patient_id == p.id
-        ).first()
-        if not token_row:
-            _send(token, chat_id, (
-                "No device connected. Send /connect_device to link your smart watch."
-            ))
-            return
-
-        # Decrypt access token
-        access_token = _decrypt(token_row.access_token)
-
-        # Check if token needs refresh
-        if datetime.fromisoformat(token_row.token_expiry) < datetime.now(timezone.utc):
-            from app.health_fit.oauth import refresh_access_token
-            refreshed = refresh_access_token(token_row.refresh_token, _get_fernet())
-            if not refreshed:
-                _send(token, chat_id, (
-                    "⚠️ Your device connection expired.\n"
-                    "Send /connect_device to re-authorize."
-                ))
-                return
-            access_token = refreshed["access_token"]
-            token_row.access_token = _encrypt(access_token)
-            token_row.token_expiry = (
-                datetime.now(timezone.utc) + timedelta(seconds=refreshed.get("expires_in", 3600))
-            ).isoformat()
-            s.commit()
-
-        # Fetch last 7 days
-        end = datetime.now(timezone.utc)
-        start = end - timedelta(days=7)
-        metrics = fetch_all_metrics(access_token, start.isoformat(), end.isoformat())
-
-        # Store fetched data
-        stored_count = 0
-        for metric_type, points in metrics.items():
-            for point in points:
-                try:
-                    row = PatientHealthData(
-                        id=uuid.uuid4().hex,
-                        patient_id=p.id,
-                        hospital_code=settings.HOSPITAL_CODE,
-                        metric_type=metric_type,
-                        value=point["value"],
-                        unit={"heart_rate": "bpm", "spo2": "%", "steps": "count",
-                              "sleep": "minutes", "body_temp": "°C"}.get(metric_type, ""),
-                        recorded_at=point["recorded_at"],
-                        source=point.get("source", "google_fit"),
-                    )
-                    s.add(row)
-                    stored_count += 1
-                except Exception:
-                    pass
-        s.commit()
-
-        # Update last_synced_at
-        token_row.last_synced_at = now_utc()
-        s.commit()
-
-        # Compute summary
-        all_rows = s.query(PatientHealthData).filter(
-            PatientHealthData.patient_id == p.id,
-        ).order_by(PatientHealthData.recorded_at.desc()).limit(200).all()
-
-        row_dicts = [
-            {"metric_type": r.metric_type, "value": r.value, "recorded_at": r.recorded_at}
-            for r in all_rows
-        ]
-        summary = compute_health_summary(row_dicts)
-
-        # Format message
-        lines = [f"📊 Health Summary for {p.name}\n"]
-
-        if "heart_rate" in summary:
-            hr = summary["heart_rate"]
-            lines.append(f"💓 Heart Rate: {hr.get('latest', '—')} bpm (avg {hr.get('avg_7d', '—')})")
-            if hr.get("flags"):
-                lines.append(f"   ⚠️ {', '.join(hr['flags'])}")
-
-        if "spo2" in summary:
-            sp = summary["spo2"]
-            lines.append(f"🫁 SpO2: {sp.get('latest', '—')}% (avg {sp.get('avg_7d', '—')}%)")
-            if sp.get("flags"):
-                lines.append(f"   ⚠️ {', '.join(sp['flags'])}")
-
-        if "steps" in summary:
-            st = summary["steps"]
-            lines.append(f"🚶 Steps today: {int(st.get('today', 0))} (avg {int(st.get('avg_7d', 0))})")
-            if st.get("flags"):
-                lines.append(f"   ⚠️ {', '.join(st['flags'])}")
-
-        if "sleep" in summary:
-            sl = summary["sleep"]
-            lines.append(f"😴 Sleep: {sl.get('latest_hours', '—')}h (avg {sl.get('avg_hours', '—')}h)")
-            if sl.get("flags"):
-                lines.append(f"   ⚠️ {', '.join(sl['flags'])}")
-
-        if "body_temp" in summary:
-            bt = summary["body_temp"]
-            lines.append(f"🌡️ Temperature: {bt.get('latest', '—')}°C")
-            if bt.get("flags"):
-                lines.append(f"   ⚠️ {', '.join(bt['flags'])}")
-
-        score = summary.get("health_score", 0)
-        lines.append(f"\n🏥 Health Score: {score}/100")
-        if summary.get("overall_flags"):
-            lines.append(f"⚠️ Flags: {', '.join(summary['overall_flags'])}")
-
-        lines.append(f"\n📡 {stored_count} data points synced")
-        lines.append("Data is shared with your care team for better recovery monitoring.")
-
-        _send(token, chat_id, "\n".join(lines))
-
-    except Exception as e:
-        log.warning("health fetch failed: %s", e)
-        _send(token, chat_id, "⚠️ Failed to fetch health data. Please try again later.")
-    finally:
-        s.close()
 
 
 # ── polling loop ──────────────────────────────────────────────────────────────
@@ -759,9 +636,18 @@ async def poll_loop() -> None:
                         offset = update["update_id"] + 1
                         msg = update.get("message")
                         if msg:
-                            # run sync handler in thread to avoid blocking
-                            loop = asyncio.get_event_loop()
-                            await loop.run_in_executor(None, _handle_message, token, msg)
+                            loop = asyncio.get_running_loop()
+                            try:
+                                await loop.run_in_executor(None, _handle_message, token, msg)
+                            except Exception as e:
+                                # Never let one bad message kill the polling
+                                # loop. Log and continue.
+                                log.exception("unhandled error in _handle_message: %s", e)
+                                try:
+                                    _send(token, msg["chat"]["id"],
+                                          "[X] Something went wrong on our side. Please try again.")
+                                except Exception:
+                                    pass
                 else:
                     log.warning("getUpdates %s: %s", r.status_code, r.text[:100])
                     await asyncio.sleep(5)
@@ -771,3 +657,31 @@ async def poll_loop() -> None:
             except Exception as e:
                 log.warning("poll error: %s", e)
                 await asyncio.sleep(5)
+
+
+def notify_google_fit_linked(telegram_id: int) -> None:
+    """Called by the health-fit OAuth callback after a successful link.
+
+    T12 follow-up: this was previously dead code (the OAuth callback
+    updated the DB but never told the user). Now it:
+    1. Marks the session's `google_fit_consent=True` (persisted)
+    2. Sends a Telegram confirmation
+    3. Falls back to logging if Telegram isn't configured.
+    """
+    s = get_session(telegram_id)
+    s.google_fit_consent = True
+    save_session(s)
+    token = settings.TELEGRAM_BOT_TOKEN
+    if not token:
+        log.info("google_fit linked for telegram_id=%s (no token to notify)", telegram_id)
+        return
+    s_db = SessionLocal()
+    try:
+        chat_id_row = s_db.query(TelegramSession).filter(
+            TelegramSession.telegram_id == telegram_id).first()
+        if not chat_id_row:
+            return
+        _send(token, chat_id_row.telegram_id,
+              "[OK] Google Fit linked. Your fitness data will start syncing within 24h.")
+    finally:
+        s_db.close()

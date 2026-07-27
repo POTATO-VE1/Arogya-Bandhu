@@ -11,7 +11,7 @@ ADMIN = {"username": "admin", "password": "changeme123"}
 
 def test_deck_is_complete():
     deck = get_deck()
-    for k in ["greet", "confirm_family", "wrong_person", "q_wound", "q_pillcount",
+    for k in ["greet", "confirm_family", "wrong_person", "q_wound",
               "red_response", "closing", "timeout_reprompt"]:
         assert k in deck, f"missing deck clip {k}"
 

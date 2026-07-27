@@ -18,7 +18,7 @@ def _enroll_body(phone="+919876543210", consent=True, protocol="wound_care"):
         "protocol_id": protocol, "condition_label": "Post-op appendectomy",
         "ward": "Ward-4", "discharge_date": "2026-07-25",
         "meds": [{"med_name": "Amoxiclav 625mg", "med_type": "antibiotic",
-                  "aware_category": "Watch", "course_days": 5, "doses_per_day": 2},
+                  "doses_per_day": 2},
                  {"med_name": "Paracetamol 500mg", "med_type": "other"}],
         "consent": consent,
     }
@@ -36,7 +36,6 @@ def test_enroll_creates_four_scheduled_calls(client, db):
     assert calls[0].scheduled_at.startswith("2026-07-26T04:30:00")
     meds = db.query(EnrollmentMed).filter(EnrollmentMed.enrollment_id == eid).all()
     assert len(meds) == 2
-    assert meds[0].aware_category == "Watch"
 
 
 def test_consent_required(client, db):
@@ -107,8 +106,8 @@ def _seed_call_row(db, protocol="wound_care", with_abx=True) -> str:
     db.add(e); db.commit(); db.refresh(e)
     if with_abx:
         db.add(EnrollmentMed(enrollment_id=e.id, med_name="Amoxiclav",
-                             med_type="antibiotic", aware_category="Watch",
-                             course_days=5, doses_per_day=2))
+                             med_type="antibiotic",
+                             doses_per_day=2))
         db.commit()
     c = FollowupCall(hospital_code="KA-DIST-01", enrollment_id=e.id,
                      day_index=1, scheduled_at=now_utc())

@@ -39,8 +39,6 @@ def suggest(body: SuggestIn, _user: User = Depends(current_user)):
 class MedIn(BaseModel):
     med_name: str = Field(max_length=200)
     med_type: str = Field(default="other", max_length=50)
-    aware_category: str | None = Field(default=None, max_length=20)
-    course_days: int | None = Field(default=None, ge=1, le=365)
     doses_per_day: int = Field(default=3, ge=1, le=20)
 
 
@@ -60,7 +58,9 @@ class EnrollIn(BaseModel):
     ward: str | None = Field(default=None, max_length=100)
     discharge_date: str = Field(max_length=10)  # YYYY-MM-DD
     meds: list[MedIn] = Field(default_factory=list)
-    consent: bool = True
+    # consent must be supplied explicitly — defaulting to True silently opts
+    # patients in, which is a legal/safety regression.
+    consent: bool
 
 
 def _hospital(user: User) -> str:
@@ -89,8 +89,7 @@ def sheet(eid: str, user: User = Depends(current_user), db: Session = Depends(ge
         "bullets_kn": sheet_instr.get("bullets_kn", []),
         "sheet_source": sheet_instr.get("source", "template"),
         "schedule_days": proto["schedule_days"],
-        "meds": [{"name": m.med_name, "aware": m.aware_category,
-                  "course_days": m.course_days, "doses_per_day": m.doses_per_day}
+        "meds": [{"name": m.med_name, "doses_per_day": m.doses_per_day}
                  for m in meds],
         "telephones": "104 / 108",
     }
@@ -127,7 +126,7 @@ def enroll(body: EnrollIn, user: User = Depends(current_user), db: Session = Dep
 
     e = Enrollment(hospital_code=hc, patient_id=p.id, protocol_id=proto["id"],
                   condition_label=body.condition_label, ward=body.ward,
-                  discharge_date=body.discharge_date)
+                  discharge_date=body.discharge_date, created_by=user.id)
     db.add(e); db.commit(); db.refresh(e)
 
     for m in body.meds:
@@ -159,15 +158,49 @@ def enroll(body: EnrollIn, user: User = Depends(current_user), db: Session = Dep
     return {"enrollment_id": e.id, "patient_id": p.id, "call_ids": call_ids}
 
 
+class VerifyBody(BaseModel):
+    method: str = "voice"          # 'desk' | 'voice'
+    confirmed: bool = True         # for 'desk', must be true
+
+
 @router.post("/api/enrollments/{eid}/verify-number")
-def verify_number(eid: str, user: User = Depends(current_user), db: Session = Depends(get_db)):
+def verify_number(eid: str, body: VerifyBody | None = None,
+                  user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """Verify the caregiver phone.
+
+    Two methods (T4 in docs/09_PLAN.md):
+    - `method=desk` — the family is physically at the discharge desk; the nurse
+      marks the number verified immediately. No Twilio required. Works in any
+      environment.
+    - `method=voice` (default if no body) — places a desk test call via Twilio
+      (J3 in docs/00). Requires Twilio creds; returns 503 otherwise.
+    """
     e = db.query(Enrollment).filter(Enrollment.id == eid,
                                     Enrollment.hospital_code == _hospital(user)).first()
     if not e:
         raise HTTPException(404)
-    p = db.query(Patient).filter(Patient.id == e.patient_id).first()
+
+    body = body or VerifyBody()
+    if body.method not in ("desk", "voice"):
+        raise HTTPException(400, "method must be 'desk' or 'voice'")
+    if body.method == "desk" and not body.confirmed:
+        raise HTTPException(400, "confirmed must be true for desk verification")
+
+    if body.method == "desk":
+        # Mark verified immediately, no phone call
+        e.number_verified = 1
+        db.commit()
+        write_audit(db, hospital_code=_hospital(user), actor=user.username,
+                    action="verify_number", entity_id=e.id,
+                    meta={"method": "desk"})
+        db.commit()
+        return {"call_id": None, "verified": True, "method": "desk"}
+
+    # method == "voice" (Twilio path)
     if not is_configured():
-        raise HTTPException(503, "twilio not configured")
+        raise HTTPException(503,
+            "twilio not configured; pass {method:'desk', confirmed:true} to verify at the desk")
+    p = db.query(Patient).filter(Patient.id == e.patient_id).first()
     pending = db.query(FollowupCall).filter(
         FollowupCall.enrollment_id == eid,
         FollowupCall.kind == "verify",
@@ -177,20 +210,59 @@ def verify_number(eid: str, user: User = Depends(current_user), db: Session = De
         raise HTTPException(409, "verification already in progress")
     c = FollowupCall(hospital_code=_hospital(user), enrollment_id=e.id,
                      day_index=0, scheduled_at=now_utc(), kind="verify",
-                     status="ringing")
+                     status="ringing", triggered_by=user.id)
     db.add(c); db.commit(); db.refresh(c)
     voice, _, status_cb = _urls(c.id)
     try:
-        sid = place_call(call_id=c.id, to_number=p.caregiver_phone,
-                         voice_url=voice, status_callback=status_cb)
+        sid, account_name = place_call(call_id=c.id, to_number=p.caregiver_phone,
+                                       voice_url=voice, status_callback=status_cb)
     except (PermissionError, RuntimeError) as ex:
         raise HTTPException(503, str(ex))
     c.provider = "twilio"; c.provider_call_sid = sid
+    c.account_name = account_name
     db.commit()
     write_audit(db, hospital_code=_hospital(user), actor=user.username,
-                action="verify_number", entity_id=e.id)
+                action="verify_number", entity_id=e.id,
+                meta={"method": "voice", "account": account_name})
     db.commit()
-    return {"call_id": c.id}
+    return {"call_id": c.id, "verified": None, "method": "voice"}
+
+
+# ── L6: patient transfer ─────────────────────────────────────────────────────
+class TransferIn(BaseModel):
+    to_ward: str = Field(min_length=1, max_length=100)
+    reason: str = Field(default="", max_length=500)
+
+
+@router.post("/api/enrollments/{eid}/transfer")
+def transfer(eid: str, body: TransferIn,
+             user: User = Depends(current_user),
+             db: Session = Depends(get_db)):
+    """Move a patient from one ward to another (within the same hospital).
+
+    Nurse/staff can only transfer patients within their assigned ward
+    (the old ward must match their user.ward). Admin/doctor can transfer
+    freely. The new ward is taken from the request body.
+    """
+    e = db.query(Enrollment).filter(
+        Enrollment.id == eid,
+        Enrollment.hospital_code == _hospital(user)).first()
+    if not e:
+        raise HTTPException(404)
+    # Ward-scope check for non-admin
+    if user.role not in ("admin", "doctor") and user.ward:
+        if e.ward and e.ward.lower() != user.ward.lower():
+            raise HTTPException(403, "not your ward")
+    old_ward = e.ward
+    e.ward = body.to_ward
+    db.commit()
+    write_audit(db, hospital_code=_hospital(user), actor=user.username,
+                action="transfer", entity_id=e.id,
+                meta={"from": old_ward, "to": body.to_ward,
+                      "reason": body.reason})
+    db.commit()
+    return {"status": "transferred", "from_ward": old_ward,
+            "to_ward": body.to_ward}
 
 
 class TriggerIn(BaseModel):
@@ -218,7 +290,7 @@ def trigger_call(body: TriggerIn, user: User = Depends(current_user), db: Sessio
     if body.channel == "sim":
         c = FollowupCall(hospital_code=_hospital(user), enrollment_id=e.id,
                          day_index=0, scheduled_at=now_utc(), provider="sim",
-                         kind="demo", status="pending")
+                         kind="demo", status="pending", triggered_by=user.id)
         db.add(c); db.commit(); db.refresh(c)
         write_audit(db, hospital_code=_hospital(user), actor=user.username,
                     action="trigger_call", entity_id=c.id, meta={"channel": "sim"})
@@ -229,17 +301,20 @@ def trigger_call(body: TriggerIn, user: User = Depends(current_user), db: Sessio
         raise HTTPException(503, "twilio not configured")
     c = FollowupCall(hospital_code=_hospital(user), enrollment_id=e.id,
                      day_index=0, scheduled_at=now_utc(), provider="twilio",
-                     kind="demo", status="ringing")
+                     kind="demo", status="ringing", triggered_by=user.id)
     db.add(c); db.commit(); db.refresh(c)
     voice, _, status_cb = _urls(c.id)
     try:
-        sid = place_call(call_id=c.id, to_number=p.caregiver_phone,
-                         voice_url=voice, status_callback=status_cb)
+        sid, account_name = place_call(call_id=c.id, to_number=p.caregiver_phone,
+                                       voice_url=voice, status_callback=status_cb)
     except (PermissionError, RuntimeError) as ex:
         c.status = "failed"; db.commit()
         raise HTTPException(503, str(ex))
-    c.provider_call_sid = sid; db.commit()
+    c.provider_call_sid = sid
+    c.account_name = account_name
+    db.commit()
     write_audit(db, hospital_code=_hospital(user), actor=user.username,
-                action="trigger_call", entity_id=c.id, meta={"channel": "twilio"})
+                action="trigger_call", entity_id=c.id,
+                meta={"channel": "twilio", "account": account_name})
     db.commit()
     return {"call_id": c.id}

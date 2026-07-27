@@ -1,0 +1,501 @@
+Patient Name,Age,Sex,Caregiver Name,Caregiver Phone,Condition,Protocol,Discharge Date,Ward,Medication,Med Type,AWaRe Category,Course Days,Doses/Day
+Eshwar Hegde,37,M,Gangamma Naik,+919362950628,Surgical site infection,wound_care,2026-07-07,Ward-2,Metronidazole 400mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,3,3
+Parvathamma Shetty,66,F,Ravi Nair,+919746412689,Post-op knee replacement,wound_care,2026-07-05,Obstetrics,Cefuroxime 500mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,7,3
+Lakshmamma Gowdru,56,F,Naveen Siddappa,+919465341213,Post-op knee replacement,wound_care,2026-07-26,Cardiology,Cefuroxime 500mg + Ibuprofen 400mg,antibiotic+other,Watch,14,2
+Anita Kudachi,60,F,Manjunath Naik,+919675770529,Post-op cholecystectomy,wound_care,2026-07-16,Ward-2,Metronidazole 400mg,antibiotic,Watch,7,3
+Shankar Reddy,31,M,Savithramma Patil,+919930075810,Post-op hernia repair,wound_care,2026-06-22,Ward-4,Cefuroxime 500mg + Ibuprofen 400mg,antibiotic+other,Watch,5,2
+Mahesh Kulkarni,36,M,Vasantha Rathod,+919853573823,Post-viral fatigue,fever_viral,2026-07-10,General-Surgery,Paracetamol 500mg + ORS packets,other+other,Access,7,4
+Eshwar Siddappa,43,M,Bhagya Nair,+919924970419,Cellulitis on Amoxicillin,antibiotic_course,2026-06-27,Ward-1,Cefixime 200mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,14,2
+Jyothi Reddy,84,F,Shankar Desai,+919592688426,C-section wound care,wound_care,2026-07-02,Ward-4,Metronidazole 400mg,antibiotic,Watch,10,3
+Thimmaiah Desai,19,M,Lalitha Nair,+919647099690,Lower RTI on Azithromycin,antibiotic_course,2026-07-25,Ward-2,Ciprofloxacin 500mg,antibiotic,Watch,10,2
+Veeresh Shetty,78,M,Manjula Desai,+919602564736,Typhoid on Ceftriaxone,antibiotic_course,2026-07-07,Ward-1,Azithromycin 500mg,antibiotic,Watch,14,1
+Asha Gowdru,39,F,Ashok Hegde,+919566825638,Post-op appendectomy,wound_care,2026-06-14,Orthopedics,Amoxiclav 625mg,antibiotic,Watch,3,2
+Dharma Iyer,79,M,Jyothi Prasad,+919313579170,C-section wound care,wound_care,2026-06-15,Emergency,Metronidazole 400mg,antibiotic,Watch,14,3
+Kalpana Pai,48,F,Venkatesh Hegde,+919992994062,Dengue convalescence,fever_viral,2026-07-24,Ward-1,Paracetamol 500mg + ORS packets,other+other,Access,3,4
+Lingaraj Gowdru,62,M,Latha Kamath,+919690347116,Burn wound management,wound_care,2026-07-20,General-Surgery,Amoxiclav 625mg,antibiotic,Watch,5,2
+Indu Desai,68,F,Darshan Bhat,+919584779555,Post-op knee replacement,wound_care,2026-07-22,Ward-2,Metronidazole 400mg,antibiotic,Watch,14,3
+Sharada Gowda,82,F,Ganesh Siddappa,+919163215224,Post-op appendectomy,wound_care,2026-07-27,Cardiology,Amoxiclav 625mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,5,2
+Mallikarjun Kamath,62,M,Chitra Swamy,+919360916298,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-26,Ward-4,Cefixime 200mg,antibiotic,Watch,10,2
+Sunil Naik,84,M,Parvathamma Rathod,+919205675387,Surgical site infection,wound_care,2026-06-27,Cardiology,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,14,3
+Vijay Kamath,37,M,Rajeshwari Rao,+919596743109,Post-op hernia repair,wound_care,2026-06-27,ICU,Metronidazole 400mg,antibiotic,Watch,3,3
+Sarojini Gowdru,54,F,Vijay Rao,+919621453189,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-25,Ward-1,Azithromycin 500mg,antibiotic,Watch,7,1
+Anil Iyer,73,M,Rajeshwari Siddappa,+919810678904,Wound infection on Cefixime,antibiotic_course,2026-07-23,Ward-4,Azithromycin 500mg,antibiotic,Watch,14,1
+Kamala Naik,8,F,Arun Patil,+919727255918,Typhoid on Ceftriaxone,antibiotic_course,2026-07-27,Ward-3,Doxycycline 100mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,3,2
+Veeresh Shetty,17,M,Annapurna Desai,+919711684318,Pilonidal sinus excision,wound_care,2026-07-12,Ward-1,Cefuroxime 500mg,antibiotic,Watch,14,2
+Gopal Naik,42,M,Bhagyashree Reddy,+919356287095,C-section wound care,wound_care,2026-07-10,Obstetrics,Cefuroxime 500mg,antibiotic,Watch,3,2
+Gangamma Bhat,14,F,Eshwar Swamy,+919178663096,Typhoid on Ceftriaxone,antibiotic_course,2026-07-26,Orthopedics,Amoxicillin 500mg,antibiotic,Watch,5,3
+Mahesh Iyer,71,M,Rathnamma Bhat,+919855420240,Post-op mastectomy,wound_care,2026-07-27,Emergency,Metronidazole 400mg + Paracetamol 500mg,antibiotic+other,Watch,5,3
+Anita Hegde,72,F,Rajesh Naik,+919266910922,Pilonidal sinus excision,wound_care,2026-07-04,Ward-4,Amoxiclav 625mg,antibiotic,Watch,7,2
+Basavaraj Pai,13,M,Bhagyashree Patil,+919781057736,Abscess drainage,wound_care,2026-07-27,Ward-1,Amoxiclav 625mg,antibiotic,Watch,7,2
+Girija Naik,56,F,Nagaraj Murthy,+919702269164,Post-op hernia repair,wound_care,2026-07-16,Ward-3,Ibuprofen 400mg,other,Access,5,2
+Ravi Kamath,48,M,Honnamma Iyer,+919954829815,Viral fever with cough,fever_viral,2026-07-25,Cardiology,Paracetamol 500mg,other,Access,7,3
+Pramod Joshi,21,M,Indu Naik,+919354194771,Fever with chills,fever_viral,2026-07-27,Pediatrics,ORS packets,other,Access,10,4
+Vimala Menon,15,F,Naveen Kudachi,+919510751046,Hep A convalescence,fever_viral,2026-07-25,Ward-4,ORS packets,other,Access,5,4
+Sharada Gowda,44,F,Prakash Desai,+919399147754,Chikungunya recovery,fever_viral,2026-07-10,Cardiology,ORS packets,other,Access,14,4
+Ramesh Gowda,24,M,Kamala Menon,+919723403479,Chikungunya recovery,fever_viral,2026-07-26,Ward-1,ORS packets,other,Access,7,4
+Ravi Kumar,51,M,Yellamma Hegde,+919719106699,Post-op appendectomy,wound_care,2026-07-27,Pediatrics,Metronidazole 400mg,antibiotic,Watch,5,3
+Ganesh Joshi,44,M,Savithramma Rathod,+919769108025,Post-op hernia repair,wound_care,2026-07-17,Orthopedics,Cefuroxime 500mg,antibiotic,Watch,7,2
+Nagaraj Kamath,50,M,Tulasi Joshi,+919827264603,Wound infection on Cefixime,antibiotic_course,2026-07-15,General-Surgery,Cefixime 200mg,antibiotic,Watch,3,2
+Geetha Iyer,76,F,Ravi Joshi,+919751397897,Dental infection on Metronidazole,antibiotic_course,2026-07-20,ICU,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Rathnamma Iyer,83,F,Thimmaiah Rathod,+919764926227,Post-op knee replacement,wound_care,2026-07-23,Obstetrics,Amoxiclav 625mg + Paracetamol 500mg,antibiotic+other,Watch,5,3
+Vinod Kumar,55,M,Savithramma Bhat,+919776205431,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-21,ICU,Ciprofloxacin 500mg,antibiotic,Watch,3,2
+Vasantha Gowdru,24,F,Mallikarjun Nair,+919963406382,Hep A convalescence,fever_viral,2026-07-15,Ward-1,Paracetamol 500mg,other,Access,10,3
+Krishna Murthy,58,M,Geetha Naik,+919757830420,Influenza-like illness,fever_viral,2026-07-20,Emergency,Paracetamol 500mg,other,Access,10,3
+Vijay Menon,83,M,Annapurna Math,+919397760792,Typhoid on Ceftriaxone,antibiotic_course,2026-07-11,ICU,Amoxicillin 500mg,antibiotic,Watch,7,3
+Umadevi Menon,71,F,Ashok Naik,+919186519602,Post-op knee replacement,wound_care,2026-07-06,Pediatrics,Amoxiclav 625mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,7,2
+Mallikarjun Bhat,28,M,Pushpa Patil,+919994310083,Pilonidal sinus excision,wound_care,2026-06-23,Ward-1,Metronidazole 400mg,antibiotic,Watch,3,3
+Suresh Iyer,55,M,Manjula Math,+919677909930,Typhoid on Ceftriaxone,antibiotic_course,2026-06-20,General-Surgery,Cefixime 200mg,antibiotic,Watch,10,2
+Parvathamma Desai,53,F,Ashok Rathod,+919877583839,Laceration repair,wound_care,2026-06-13,Ward-3,Metronidazole 400mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,14,3
+Raghu Rathod,84,M,Gangamma Shetty,+919560219456,Laceration repair,wound_care,2026-07-27,Ward-3,Cefuroxime 500mg,antibiotic,Watch,10,2
+Kalpana Naik,55,F,Gopal Menon,+919370874491,Hep A convalescence,fever_viral,2026-07-01,Ward-1,Paracetamol 500mg,other,Access,7,3
+Sharada Devi,7,F,Ganesh Gowdru,+919909851739,Post-op knee replacement,wound_care,2026-06-24,Ward-4,Metronidazole 400mg + Amoxiclav 625mg,antibiotic+antibiotic,Watch,10,3
+Yashoda Swamy,34,F,Ravi Bhat,+919923450567,Pilonidal sinus excision,wound_care,2026-06-14,General-Surgery,Paracetamol 500mg,other,Access,5,3
+Indu Hegde,41,F,Chetan Gowda,+919718257024,Pharyngitis on Amoxicillin,antibiotic_course,2026-06-16,Pediatrics,Ciprofloxacin 500mg,antibiotic,Watch,3,2
+Geetha Rathod,17,F,Dharma Kudachi,+919954942461,Viral fever with cough,fever_viral,2026-07-16,Cardiology,ORS packets,other,Access,3,4
+Kiran Math,57,M,Vimala Hegde,+919488896443,Dental infection on Metronidazole,antibiotic_course,2026-07-20,Ward-3,Doxycycline 100mg,antibiotic,Watch,7,2
+Bharath Kudachi,63,M,Asha Gowdru,+919599154414,Surgical site infection,wound_care,2026-07-24,General-Surgery,Amoxiclav 625mg,antibiotic,Watch,3,2
+Bhagya Bhat,61,F,Vijay Gowdru,+919711871397,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-27,Cardiology,Amoxicillin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,7,3
+Anita Naik,37,F,Sunil Kumar,+919696776072,Post-op knee replacement,wound_care,2026-07-24,Ward-2,Cefuroxime 500mg,antibiotic,Watch,5,2
+Vinod Devi,4,M,Vimala Bhat,+919199915275,Post-op cholecystectomy,wound_care,2026-07-23,Ward-4,Metronidazole 400mg,antibiotic,Watch,14,3
+Krishna Kulkarni,72,M,Rajeshwari Naik,+919455184454,Laceration repair,wound_care,2026-07-23,Orthopedics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Annapurna Naik,25,F,Veeresh Gowdru,+919305665554,Laceration repair,wound_care,2026-07-03,Orthopedics,Metronidazole 400mg,antibiotic,Watch,3,3
+Manjula Iyer,24,F,Girish Kulkarni,+919424557359,Burn wound management,wound_care,2026-07-24,Ward-3,Paracetamol 500mg,other,Access,5,3
+Eshwar Gowdru,3,M,Vimala Hegde,+919716396766,Laceration repair,wound_care,2026-07-22,ICU,Paracetamol 500mg + Cefuroxime 500mg,other+antibiotic,Access,3,3
+Latha Desai,75,F,Shankar Shetty,+919775862179,Wound infection on Cefixime,antibiotic_course,2026-06-26,Ward-3,Amoxicillin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,3,3
+Pramod Gowdru,78,M,Pushpa Kumar,+919949051496,Typhoid on Ceftriaxone,antibiotic_course,2026-07-20,Pediatrics,Cefixime 200mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,10,2
+Indu Swamy,80,F,Eshwar Patil,+919894664845,Post-op knee replacement,wound_care,2026-07-25,Obstetrics,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,14,3
+Padmavathi Rao,59,F,Ramesh Joshi,+919840206617,Pneumonia on Levofloxacin,antibiotic_course,2026-07-24,Ward-1,Amoxicillin 500mg,antibiotic,Watch,10,3
+Padmavathi Rathod,82,F,Girish Menon,+919733281747,Cellulitis on Amoxicillin,antibiotic_course,2026-07-26,Pediatrics,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Durga Shetty,41,F,Suresh Rao,+919738923667,Otitis media on Amoxiclav,antibiotic_course,2026-07-20,Orthopedics,Cefixime 200mg,antibiotic,Watch,10,2
+Asha Prasad,58,F,Veeresh Pai,+919186373782,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-13,Cardiology,Azithromycin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,14,2
+Honnamma Gowdru,7,F,Sunil Swamy,+919919382051,Dental infection on Metronidazole,antibiotic_course,2026-07-09,Emergency,Amoxicillin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,10,3
+Eshwar Math,62,M,Vimala Shetty,+919473620340,Diabetic foot ulcer,wound_care,2026-07-26,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,10,2
+Chitra Rathod,72,F,Krishna Math,+919139403247,Skin infection on Clindamycin,antibiotic_course,2026-07-23,Orthopedics,Cefixime 200mg,antibiotic,Watch,3,2
+Mallikarjun Bhat,26,M,Pushpa Patil,+919656670062,Laceration repair,wound_care,2026-07-20,Obstetrics,Paracetamol 500mg + Metronidazole 400mg,other+antibiotic,Access,5,3
+Chitra Bhat,5,F,Shankar Hegde,+919776481264,Cellulitis on Amoxicillin,antibiotic_course,2026-07-23,Ward-3,Azithromycin 500mg,antibiotic,Watch,3,1
+Sharada Math,17,F,Santosh Bhat,+919795472980,Hep A convalescence,fever_viral,2026-07-17,Orthopedics,ORS packets,other,Access,10,4
+Vinod Nair,20,M,Thulasi Murthy,+919511872350,Pilonidal sinus excision,wound_care,2026-07-02,Emergency,Amoxiclav 625mg,antibiotic,Watch,7,2
+Kiran Naik,2,M,Yellamma Menon,+919403696046,Otitis media on Amoxiclav,antibiotic_course,2026-06-12,General-Surgery,Cefixime 200mg,antibiotic,Watch,10,2
+Lingaraj Pai,72,M,Kaveri Naik,+919919128302,Dental infection on Metronidazole,antibiotic_course,2026-06-22,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Naveen Patil,62,M,Girija Naik,+919857232668,Influenza-like illness,fever_viral,2026-06-12,Pediatrics,Paracetamol 500mg,other,Access,3,3
+Bhagyashree Prasad,14,F,Chetan Naik,+919572775194,Laceration repair,wound_care,2026-07-03,Ward-1,Cefuroxime 500mg,antibiotic,Watch,5,2
+Padmavathi Pai,81,F,Anil Naik,+919843785903,Post-op hernia repair,wound_care,2026-06-23,Cardiology,Metronidazole 400mg,antibiotic,Watch,7,3
+Dharma Siddappa,6,M,Vimala Murthy,+919762992051,Post-op mastectomy,wound_care,2026-06-18,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,10,2
+Tulasi Gowdru,23,F,Rajesh Bhat,+919845178074,Post-op appendectomy,wound_care,2026-07-23,Ward-1,Paracetamol 500mg + Ibuprofen 400mg,other+other,Access,10,3
+Durga Nair,74,F,Uday Joshi,+919832077572,Wound infection on Cefixime,antibiotic_course,2026-07-26,Ward-3,Cefixime 200mg,antibiotic,Watch,5,2
+Ashok Swamy,61,M,Padmavathi Nair,+919784944881,Abscess drainage,wound_care,2026-07-27,Obstetrics,Cefuroxime 500mg,antibiotic,Watch,14,2
+Girija Shetty,77,F,Nagaraj Kulkarni,+919421214426,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-19,Orthopedics,Amoxicillin 500mg + Cefixime 200mg,antibiotic+antibiotic,Watch,10,3
+Vasantha Nair,47,F,Gopal Swamy,+919717199615,Surgical site infection,wound_care,2026-07-27,Orthopedics,Cefuroxime 500mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,3,3
+Yogesh Naik,38,M,Vimala Math,+919932945529,Otitis media on Amoxiclav,antibiotic_course,2026-07-24,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Dharma Hegde,7,M,Jyothi Devi,+919431714152,Lower RTI on Azithromycin,antibiotic_course,2026-07-22,General-Surgery,Ciprofloxacin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,7,3
+Kiran Rao,71,M,Tulasi Kamath,+919492836532,Pneumonia on Levofloxacin,antibiotic_course,2026-07-24,Ward-3,Cefixime 200mg,antibiotic,Watch,7,2
+Venkatesh Kudachi,11,M,Kamala Bhat,+919251136695,Cellulitis on Amoxicillin,antibiotic_course,2026-07-03,Obstetrics,Cefixime 200mg,antibiotic,Watch,14,2
+Ganesh Shetty,35,M,Nagarathna Gowda,+919676140134,Diabetic foot ulcer,wound_care,2026-07-01,Obstetrics,Ibuprofen 400mg,other,Access,7,2
+Vasantha Rathod,5,F,Girish Pai,+919765233376,Viral gastroenteritis,fever_viral,2026-07-24,General-Surgery,Paracetamol 500mg,other,Access,10,3
+Geetha Devi,19,F,Lingaraj Hegde,+919148690765,Chikungunya recovery,fever_viral,2026-07-26,ICU,Paracetamol 500mg,other,Access,5,3
+Santosh Bhat,71,M,Lalitha Rathod,+919550033924,Wound infection on Cefixime,antibiotic_course,2026-07-09,Pediatrics,Cefixime 200mg,antibiotic,Watch,7,2
+Savithramma Siddappa,58,F,Darshan Reddy,+919577488537,Viral gastroenteritis,fever_viral,2026-06-13,Ward-2,ORS packets,other,Access,7,4
+Kamala Desai,17,F,Sunil Reddy,+919984968439,Cellulitis on Amoxicillin,antibiotic_course,2026-07-10,Obstetrics,Azithromycin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,5,3
+Bhagyashree Kudachi,10,F,Bharath Reddy,+919991010113,Cellulitis on Amoxicillin,antibiotic_course,2026-07-24,General-Surgery,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Veeresh Gowda,18,M,Chandrakala Kamath,+919680051935,C-section wound care,wound_care,2026-07-08,Ward-2,Paracetamol 500mg + Ibuprofen 400mg,other+other,Access,5,3
+Uday Naik,35,M,Gangamma Rao,+919156263020,Post-op cholecystectomy,wound_care,2026-07-26,Emergency,Paracetamol 500mg,other,Access,7,3
+Darshan Swamy,66,M,Vijaya Bhat,+919337887233,Viral fever with cough,fever_viral,2026-07-17,Obstetrics,ORS packets,other,Access,3,4
+Kamala Pai,15,F,Krishna Joshi,+919626422169,Dental infection on Metronidazole,antibiotic_course,2026-06-19,Ward-2,Amoxicillin 500mg,antibiotic,Watch,3,3
+Bhagyashree Menon,76,F,Eshwar Devi,+919688793237,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-17,General-Surgery,Cefixime 200mg,antibiotic,Watch,10,2
+Tulasi Kudachi,72,F,Santosh Devi,+919873995963,Influenza-like illness,fever_viral,2026-06-20,ICU,ORS packets,other,Access,10,4
+Umesh Joshi,56,M,Vijaya Naik,+919435569630,Skin infection on Clindamycin,antibiotic_course,2026-07-06,Ward-3,Cefixime 200mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,3,2
+Ravi Hegde,18,M,Lalitha Kudachi,+919697398528,Burn wound management,wound_care,2026-07-22,Emergency,Paracetamol 500mg,other,Access,10,3
+Vijaya Iyer,47,F,Dharma Iyer,+919211240259,Cellulitis on Amoxicillin,antibiotic_course,2026-07-09,Ward-3,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Pramod Kulkarni,37,M,Kamala Gowdru,+919716435189,Post-op cholecystectomy,wound_care,2026-06-14,Emergency,Metronidazole 400mg,antibiotic,Watch,14,3
+Parvathamma Kumar,25,F,Sunil Gowda,+919393421844,Pneumonia on Levofloxacin,antibiotic_course,2026-07-22,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,14,2
+Umesh Shetty,83,M,Padmavathi Naik,+919132917811,Burn wound management,wound_care,2026-07-22,Ward-4,Cefuroxime 500mg,antibiotic,Watch,7,2
+Indu Naik,74,F,Arun Gowdru,+919740190407,Post-op appendectomy,wound_care,2026-07-25,Ward-3,Metronidazole 400mg + Paracetamol 500mg,antibiotic+other,Watch,7,3
+Girish Rathod,79,M,Rajeshwari Pai,+919574641329,Post-op knee replacement,wound_care,2026-07-26,Emergency,Cefuroxime 500mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,10,3
+Krishna Rathod,30,M,Fathima Patil,+919524410834,Viral fever with cough,fever_viral,2026-07-25,Ward-1,Paracetamol 500mg,other,Access,7,3
+Deepa Naik,65,F,Santosh Gowda,+919902100304,C-section wound care,wound_care,2026-07-16,Pediatrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Padmavathi Desai,4,F,Manjunath Joshi,+919593657365,Viral gastroenteritis,fever_viral,2026-07-20,General-Surgery,ORS packets,other,Access,10,4
+Deepa Hegde,43,F,Krishna Gowda,+919284547422,Hep A convalescence,fever_viral,2026-07-26,Cardiology,Paracetamol 500mg + ORS packets,other+other,Access,14,4
+Rathnamma Desai,45,F,Rahul Naik,+919337911187,C-section wound care,wound_care,2026-07-17,Ward-2,Paracetamol 500mg,other,Access,5,3
+Manjunath Kulkarni,20,M,Kalpana Math,+919353691745,Abscess drainage,wound_care,2026-07-25,Ward-4,Amoxiclav 625mg,antibiotic,Watch,3,2
+Kaveri Gowdru,74,F,Shankar Bhat,+919915911873,Otitis media on Amoxiclav,antibiotic_course,2026-07-10,Obstetrics,Doxycycline 100mg,antibiotic,Watch,7,2
+Fathima Bhat,58,F,Ganesh Pai,+919777944609,Abscess drainage,wound_care,2026-07-27,General-Surgery,Metronidazole 400mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,10,3
+Savithramma Patil,38,F,Darshan Math,+919182389284,UTI on Ciprofloxacin,antibiotic_course,2026-07-14,General-Surgery,Cefixime 200mg,antibiotic,Watch,14,2
+Suma Bhat,26,F,Bharath Devi,+919445236735,Typhoid on Ceftriaxone,antibiotic_course,2026-06-15,Ward-3,Cefixime 200mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,3,3
+Basavaraj Devi,33,M,Sarojini Patil,+919859803019,Laceration repair,wound_care,2026-07-17,Emergency,Amoxiclav 625mg,antibiotic,Watch,7,2
+Santosh Joshi,78,M,Jayalakshmi Rathod,+919156227043,Skin infection on Clindamycin,antibiotic_course,2026-07-22,Ward-2,Doxycycline 100mg,antibiotic,Watch,7,2
+Yellamma Naik,44,F,Dharma Kamath,+919187512088,Wound infection on Cefixime,antibiotic_course,2026-07-23,Cardiology,Cefixime 200mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,7,2
+Pramod Desai,44,M,Kalpana Kudachi,+919973150512,Surgical site infection,wound_care,2026-06-18,Obstetrics,Paracetamol 500mg,other,Access,10,3
+Darshan Kulkarni,41,M,Gangamma Kulkarni,+919293555835,Viral gastroenteritis,fever_viral,2026-07-25,ICU,Paracetamol 500mg + ORS packets,other+other,Access,3,4
+Basavaraj Gowdru,69,M,Asha Math,+919140531056,Otitis media on Amoxiclav,antibiotic_course,2026-07-13,Ward-3,Ciprofloxacin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,5,2
+Girish Patil,32,M,Pushpa Kulkarni,+919576954730,Dental infection on Metronidazole,antibiotic_course,2026-07-16,Ward-4,Amoxicillin 500mg,antibiotic,Watch,10,3
+Manjula Kulkarni,61,F,Bharath Bhat,+919926178355,Post-op cholecystectomy,wound_care,2026-07-17,Emergency,Amoxiclav 625mg,antibiotic,Watch,14,2
+Chandrakala Menon,63,F,Suresh Devi,+919498585961,UTI on Ciprofloxacin,antibiotic_course,2026-06-23,Emergency,Amoxicillin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,7,3
+Vijay Prasad,57,M,Padmavathi Math,+919198476695,Dengue convalescence,fever_viral,2026-06-21,ICU,Paracetamol 500mg,other,Access,10,3
+Basavaraj Kulkarni,12,M,Annapurna Desai,+919502559419,Diabetic foot ulcer,wound_care,2026-06-24,Ward-2,Ibuprofen 400mg,other,Access,5,2
+Savithramma Iyer,19,F,Raghu Siddappa,+919914799481,Dental infection on Metronidazole,antibiotic_course,2026-07-27,General-Surgery,Azithromycin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,5,2
+Nagaraj Naik,56,M,Geetha Prasad,+919219385981,Cellulitis on Amoxicillin,antibiotic_course,2026-07-26,Orthopedics,Ciprofloxacin 500mg,antibiotic,Watch,14,2
+Anil Shetty,65,M,Kamala Math,+919740743666,Typhoid on Ceftriaxone,antibiotic_course,2026-07-24,General-Surgery,Ciprofloxacin 500mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,14,2
+Suresh Nair,25,M,Chitra Joshi,+919813363254,Typhoid on Ceftriaxone,antibiotic_course,2026-07-27,Cardiology,Doxycycline 100mg,antibiotic,Watch,14,2
+Nagaraj Gowda,7,M,Manjula Pai,+919782546314,Diabetic foot ulcer,wound_care,2026-07-01,Orthopedics,Ibuprofen 400mg,other,Access,7,2
+Umadevi Naik,76,F,Rajesh Gowdru,+919889401015,Wound infection on Cefixime,antibiotic_course,2026-07-22,Ward-1,Amoxicillin 500mg,antibiotic,Watch,5,3
+Sunil Siddappa,25,M,Umadevi Devi,+919971339002,Surgical site infection,wound_care,2026-07-27,ICU,Amoxiclav 625mg,antibiotic,Watch,3,2
+Jyothi Iyer,71,F,Thimmaiah Desai,+919608309128,Post-op mastectomy,wound_care,2026-07-23,Ward-4,Paracetamol 500mg,other,Access,7,3
+Asha Hegde,53,F,Darshan Joshi,+919898120571,Post-op cholecystectomy,wound_care,2026-06-14,Cardiology,Cefuroxime 500mg,antibiotic,Watch,7,2
+Gopal Menon,56,M,Suma Naik,+919184747224,C-section wound care,wound_care,2026-07-23,Emergency,Paracetamol 500mg + Ibuprofen 400mg,other+other,Access,7,3
+Vijay Kumar,58,M,Rajeshwari Rao,+919477470703,Surgical site infection,wound_care,2026-07-12,Cardiology,Cefuroxime 500mg + Paracetamol 500mg,antibiotic+other,Watch,3,3
+Eshwar Desai,22,M,Lalitha Prasad,+919133436988,Pilonidal sinus excision,wound_care,2026-06-29,Obstetrics,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,7,3
+Ganesh Desai,79,M,Chitra Patil,+919264752975,Skin infection on Clindamycin,antibiotic_course,2026-07-20,Cardiology,Azithromycin 500mg,antibiotic,Watch,14,1
+Ganesh Desai,37,M,Girija Devi,+919368018471,Viral fever with cough,fever_viral,2026-07-18,Ward-3,ORS packets,other,Access,3,4
+Anita Gowdru,59,F,Anil Siddappa,+919330393232,Chikungunya recovery,fever_viral,2026-07-25,ICU,Paracetamol 500mg,other,Access,10,3
+Kaveri Siddappa,42,F,Nagaraj Shetty,+919817087513,Post-op hernia repair,wound_care,2026-07-16,Emergency,Ibuprofen 400mg,other,Access,5,2
+Ganesh Prasad,27,M,Yashoda Hegde,+919950474042,Laceration repair,wound_care,2026-07-22,Ward-1,Metronidazole 400mg,antibiotic,Watch,14,3
+Bhagyashree Kumar,41,F,Mahesh Shetty,+919527521016,Hep A convalescence,fever_viral,2026-07-21,Emergency,ORS packets,other,Access,3,4
+Bhagyashree Naik,61,F,Ganesh Bhat,+919830261466,Wound infection on Cefixime,antibiotic_course,2026-07-10,Emergency,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Ravi Prasad,17,M,Parvathamma Math,+919656307931,C-section wound care,wound_care,2026-07-23,Ward-3,Amoxiclav 625mg,antibiotic,Watch,14,2
+Chitra Shetty,83,F,Anil Reddy,+919691461470,Post-op mastectomy,wound_care,2026-07-12,Orthopedics,Paracetamol 500mg,other,Access,5,3
+Uday Swamy,81,M,Padmavathi Rao,+919873773537,Viral gastroenteritis,fever_viral,2026-07-27,General-Surgery,Paracetamol 500mg + ORS packets,other+other,Access,5,4
+Shankar Joshi,5,M,Indu Devi,+919634764290,Chikungunya recovery,fever_viral,2026-06-15,Obstetrics,ORS packets,other,Access,7,4
+Anil Shetty,58,M,Parvathamma Rao,+919546270451,Cellulitis on Amoxicillin,antibiotic_course,2026-07-13,Cardiology,Amoxicillin 500mg,antibiotic,Watch,7,3
+Manjunath Desai,49,M,Latha Gowdru,+919652955706,Skin infection on Clindamycin,antibiotic_course,2026-07-19,Ward-4,Amoxicillin 500mg,antibiotic,Watch,5,3
+Tulasi Patil,80,F,Vinod Desai,+919548968760,C-section wound care,wound_care,2026-06-17,Cardiology,Ibuprofen 400mg + Amoxiclav 625mg,other+antibiotic,Access,10,2
+Darshan Bhat,65,M,Vimala Iyer,+919124885365,Post-op cholecystectomy,wound_care,2026-07-19,Emergency,Amoxiclav 625mg + Ibuprofen 400mg,antibiotic+other,Watch,3,2
+Vijaya Iyer,62,F,Shankar Kumar,+919406819991,UTI on Ciprofloxacin,antibiotic_course,2026-07-26,Pediatrics,Amoxicillin 500mg,antibiotic,Watch,10,3
+Ganesh Patil,74,M,Nagarathna Patil,+919703246271,Burn wound management,wound_care,2026-07-27,Orthopedics,Metronidazole 400mg,antibiotic,Watch,14,3
+Bhagya Math,80,F,Eshwar Rathod,+919227572362,Post-op hernia repair,wound_care,2026-07-22,Pediatrics,Ibuprofen 400mg,other,Access,7,2
+Durga Reddy,53,F,Dharma Prasad,+919636954564,Post-op appendectomy,wound_care,2026-07-04,Ward-3,Cefuroxime 500mg,antibiotic,Watch,5,2
+Yogesh Prasad,80,M,Latha Naik,+919442019016,Pilonidal sinus excision,wound_care,2026-07-14,Orthopedics,Metronidazole 400mg,antibiotic,Watch,14,3
+Arun Siddappa,62,M,Chitra Iyer,+919975903641,Diabetic foot ulcer,wound_care,2026-07-26,Obstetrics,Cefuroxime 500mg,antibiotic,Watch,3,2
+Veeresh Pai,76,M,Bhagyashree Devi,+919720230209,Post-op appendectomy,wound_care,2026-07-19,General-Surgery,Metronidazole 400mg,antibiotic,Watch,14,3
+Rajesh Kamath,75,M,Annapurna Patil,+919852178601,Post-op appendectomy,wound_care,2026-07-23,ICU,Amoxiclav 625mg,antibiotic,Watch,5,2
+Naveen Prasad,9,M,Indu Pai,+919857820386,Post-op knee replacement,wound_care,2026-07-23,Emergency,Cefuroxime 500mg,antibiotic,Watch,7,2
+Kaveri Bhat,71,F,Veeresh Naik,+919480412754,Pneumonia on Levofloxacin,antibiotic_course,2026-07-18,General-Surgery,Ciprofloxacin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,5,3
+Geetha Gowdru,28,F,Vinod Siddappa,+919841139461,Skin infection on Clindamycin,antibiotic_course,2026-07-22,ICU,Amoxicillin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,14,3
+Rajesh Desai,20,M,Kaveri Gowdru,+919411871167,Surgical site infection,wound_care,2026-07-22,Ward-2,Cefuroxime 500mg,antibiotic,Watch,10,2
+Rajeshwari Reddy,73,F,Veeresh Menon,+919847508242,Post-op hernia repair,wound_care,2026-07-02,General-Surgery,Amoxiclav 625mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,5,3
+Eshwar Nair,54,M,Parvathamma Hegde,+919454650074,UTI on Ciprofloxacin,antibiotic_course,2026-06-30,Obstetrics,Azithromycin 500mg,antibiotic,Watch,5,1
+Naveen Devi,27,M,Umadevi Pai,+919911653317,Viral gastroenteritis,fever_viral,2026-07-09,Orthopedics,Paracetamol 500mg,other,Access,5,3
+Lingaraj Naik,55,M,Honnamma Rao,+919999371401,Post-op appendectomy,wound_care,2026-06-28,Pediatrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Savithramma Gowda,79,F,Rahul Swamy,+919215213239,Viral gastroenteritis,fever_viral,2026-07-20,Orthopedics,ORS packets,other,Access,5,4
+Basavaraj Bhat,16,M,Chandrakala Reddy,+919455069350,Laceration repair,wound_care,2026-07-24,Obstetrics,Amoxiclav 625mg + Ibuprofen 400mg,antibiotic+other,Watch,7,2
+Raghu Rathod,80,M,Tulasi Rao,+919785826598,Influenza-like illness,fever_viral,2026-07-23,Emergency,ORS packets,other,Access,5,4
+Chandrakala Pai,2,F,Arun Nair,+919380016058,Laceration repair,wound_care,2026-06-15,Orthopedics,Ibuprofen 400mg,other,Access,14,2
+Gangamma Menon,32,F,Darshan Siddappa,+919166705490,Dental infection on Metronidazole,antibiotic_course,2026-07-25,Orthopedics,Doxycycline 100mg,antibiotic,Watch,7,2
+Annapurna Devi,80,F,Vinod Kulkarni,+919337135066,C-section wound care,wound_care,2026-07-25,ICU,Metronidazole 400mg,antibiotic,Watch,14,3
+Vinod Gowdru,29,M,Asha Kudachi,+919918040539,Pilonidal sinus excision,wound_care,2026-07-17,Ward-2,Metronidazole 400mg,antibiotic,Watch,3,3
+Raghu Hegde,72,M,Parvathamma Math,+919642762599,Burn wound management,wound_care,2026-07-25,Ward-3,Metronidazole 400mg,antibiotic,Watch,5,3
+Thimmaiah Pai,59,M,Suma Prasad,+919968326513,C-section wound care,wound_care,2026-07-21,Emergency,Metronidazole 400mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,7,3
+Honnamma Desai,2,F,Anil Math,+919900801470,Post-op hernia repair,wound_care,2026-07-20,Ward-1,Paracetamol 500mg,other,Access,3,3
+Latha Pai,54,F,Manjunath Iyer,+919293253475,Pharyngitis on Amoxicillin,antibiotic_course,2026-06-12,Cardiology,Cefixime 200mg,antibiotic,Watch,10,2
+Rajesh Shetty,46,M,Asha Kamath,+919227381397,Burn wound management,wound_care,2026-07-17,Pediatrics,Amoxiclav 625mg,antibiotic,Watch,3,2
+Geetha Bhat,70,F,Veeresh Joshi,+919507245006,Dengue convalescence,fever_viral,2026-07-22,ICU,ORS packets + Paracetamol 500mg,other+other,Access,3,4
+Kiran Kumar,28,M,Gangamma Nair,+919172253060,Post-op appendectomy,wound_care,2026-07-13,ICU,Paracetamol 500mg,other,Access,10,3
+Girish Nair,9,M,Asha Reddy,+919250469429,Pneumonia on Levofloxacin,antibiotic_course,2026-06-26,Ward-4,Doxycycline 100mg,antibiotic,Watch,14,2
+Kalpana Nair,68,F,Rahul Kamath,+919337342839,Abscess drainage,wound_care,2026-07-16,Ward-1,Metronidazole 400mg,antibiotic,Watch,5,3
+Dharma Rathod,65,M,Rajeshwari Murthy,+919150341410,Influenza-like illness,fever_viral,2026-07-23,Emergency,ORS packets,other,Access,7,4
+Rajesh Rao,32,M,Asha Pai,+919341961866,Surgical site infection,wound_care,2026-06-27,Ward-3,Paracetamol 500mg,other,Access,10,3
+Pramod Prasad,33,M,Latha Desai,+919373799489,Post-op mastectomy,wound_care,2026-06-18,Ward-2,Ibuprofen 400mg + Amoxiclav 625mg,other+antibiotic,Access,3,2
+Asha Desai,7,F,Dharma Kumar,+919178151583,Pilonidal sinus excision,wound_care,2026-07-15,Obstetrics,Cefuroxime 500mg + Ibuprofen 400mg,antibiotic+other,Watch,7,2
+Gangamma Reddy,17,F,Prakash Naik,+919901955461,Hep A convalescence,fever_viral,2026-07-06,Ward-4,Paracetamol 500mg,other,Access,5,3
+Nagaraj Naik,61,M,Durga Desai,+919673002461,Pneumonia on Levofloxacin,antibiotic_course,2026-07-22,Orthopedics,Cefixime 200mg,antibiotic,Watch,10,2
+Jyothi Reddy,54,F,Darshan Naik,+919149086585,Cellulitis on Amoxicillin,antibiotic_course,2026-07-27,Ward-3,Doxycycline 100mg,antibiotic,Watch,14,2
+Kiran Iyer,44,M,Padmavathi Reddy,+919346980616,Post-op knee replacement,wound_care,2026-07-16,ICU,Ibuprofen 400mg + Cefuroxime 500mg,other+antibiotic,Access,10,2
+Anil Rao,19,M,Kaveri Rao,+919873430762,Wound infection on Cefixime,antibiotic_course,2026-06-12,Emergency,Azithromycin 500mg,antibiotic,Watch,3,1
+Vijaya Gowdru,19,F,Ramesh Joshi,+919777210736,Surgical site infection,wound_care,2026-07-27,Ward-3,Metronidazole 400mg,antibiotic,Watch,3,3
+Chetan Devi,64,M,Indu Pai,+919116891857,Burn wound management,wound_care,2026-07-27,Pediatrics,Metronidazole 400mg,antibiotic,Watch,14,3
+Chitra Gowda,57,F,Thimmaiah Math,+919965615974,Fever with chills,fever_viral,2026-06-18,Ward-2,Paracetamol 500mg + ORS packets,other+other,Access,7,4
+Asha Kudachi,49,F,Krishna Shetty,+919535968611,Cellulitis on Amoxicillin,antibiotic_course,2026-07-23,Ward-4,Azithromycin 500mg,antibiotic,Watch,3,1
+Sarojini Desai,72,F,Gopal Desai,+919611106584,Post-op appendectomy,wound_care,2026-07-26,Ward-3,Cefuroxime 500mg,antibiotic,Watch,7,2
+Raghu Hegde,31,M,Anita Patil,+919327007332,Hep A convalescence,fever_viral,2026-07-27,Orthopedics,Paracetamol 500mg,other,Access,7,3
+Mallikarjun Swamy,42,M,Honnamma Rao,+919116812751,Fever with chills,fever_viral,2026-06-17,Pediatrics,ORS packets + Paracetamol 500mg,other+other,Access,14,4
+Santosh Rathod,51,M,Asha Naik,+919911329267,UTI on Ciprofloxacin,antibiotic_course,2026-07-02,Emergency,Amoxicillin 500mg + Cefixime 200mg,antibiotic+antibiotic,Watch,5,3
+Padmavathi Naik,80,F,Dharma Gowdru,+919739529933,Diabetic foot ulcer,wound_care,2026-07-10,Ward-1,Cefuroxime 500mg,antibiotic,Watch,7,2
+Nagaraj Desai,76,M,Rajeshwari Rao,+919809391059,Pilonidal sinus excision,wound_care,2026-06-27,Orthopedics,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,10,3
+Eshwar Kamath,48,M,Manjula Naik,+919214408183,Abscess drainage,wound_care,2026-07-22,ICU,Ibuprofen 400mg + Paracetamol 500mg,other+other,Access,5,3
+Ravi Bhat,67,M,Bhagya Murthy,+919538134097,Post-op hernia repair,wound_care,2026-07-16,Cardiology,Metronidazole 400mg,antibiotic,Watch,7,3
+Santosh Gowda,51,M,Durga Joshi,+919936626463,Burn wound management,wound_care,2026-07-15,Ward-4,Amoxiclav 625mg,antibiotic,Watch,5,2
+Chandrakala Menon,65,F,Rahul Menon,+919256696327,Post-op cholecystectomy,wound_care,2026-07-20,Orthopedics,Cefuroxime 500mg,antibiotic,Watch,7,2
+Yellamma Nair,80,F,Shankar Kumar,+919309968304,Wound infection on Cefixime,antibiotic_course,2026-07-27,Orthopedics,Cefixime 200mg,antibiotic,Watch,14,2
+Rajesh Kudachi,44,M,Jayalakshmi Bhat,+919562370643,Fever with chills,fever_viral,2026-07-23,Orthopedics,Paracetamol 500mg,other,Access,5,3
+Dinesh Naik,83,M,Durga Naik,+919627215082,Dengue convalescence,fever_viral,2026-07-22,Cardiology,ORS packets,other,Access,14,4
+Nagarathna Swamy,72,F,Veeresh Rao,+919128900946,Hep A convalescence,fever_viral,2026-07-20,Ward-4,ORS packets,other,Access,3,4
+Naveen Rathod,83,M,Vimala Kamath,+919425164079,Post-op mastectomy,wound_care,2026-07-04,Ward-3,Cefuroxime 500mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,10,3
+Thimmaiah Desai,55,M,Asha Prasad,+919683734594,Diabetic foot ulcer,wound_care,2026-07-14,Emergency,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,7,3
+Jayalakshmi Devi,74,F,Eshwar Patil,+919792596980,Pharyngitis on Amoxicillin,antibiotic_course,2026-06-14,Cardiology,Cefixime 200mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,7,2
+Sharada Prasad,76,F,Uday Murthy,+919838374035,Dental infection on Metronidazole,antibiotic_course,2026-07-21,Cardiology,Doxycycline 100mg,antibiotic,Watch,5,2
+Manjunath Gowda,39,M,Umadevi Hegde,+919546650213,Post-viral fatigue,fever_viral,2026-06-25,Ward-2,Paracetamol 500mg,other,Access,7,3
+Anil Kudachi,63,M,Vasantha Prasad,+919473984594,Dental infection on Metronidazole,antibiotic_course,2026-07-23,ICU,Amoxicillin 500mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,3,3
+Venkatesh Devi,23,M,Vijaya Rathod,+919895094534,C-section wound care,wound_care,2026-07-25,Emergency,Metronidazole 400mg,antibiotic,Watch,10,3
+Thulasi Kudachi,25,F,Krishna Devi,+919300131434,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-27,Pediatrics,Doxycycline 100mg,antibiotic,Watch,10,2
+Uday Joshi,29,M,Manjula Gowda,+919320959407,Surgical site infection,wound_care,2026-07-15,Ward-2,Metronidazole 400mg + Ibuprofen 400mg,antibiotic+other,Watch,5,3
+Anil Hegde,64,M,Bhagyashree Rathod,+919666629680,Viral gastroenteritis,fever_viral,2026-07-21,General-Surgery,ORS packets,other,Access,7,4
+Suresh Bhat,40,M,Indu Rao,+919759797724,Wound infection on Cefixime,antibiotic_course,2026-07-26,Cardiology,Amoxicillin 500mg,antibiotic,Watch,5,3
+Darshan Desai,19,M,Pushpa Kumar,+919717193289,C-section wound care,wound_care,2026-07-10,ICU,Amoxiclav 625mg,antibiotic,Watch,10,2
+Chitra Kamath,59,F,Kiran Naik,+919765086407,Diabetic foot ulcer,wound_care,2026-07-18,Ward-1,Amoxiclav 625mg,antibiotic,Watch,14,2
+Basavaraj Devi,64,M,Vimala Joshi,+919546279777,Dental infection on Metronidazole,antibiotic_course,2026-07-25,ICU,Doxycycline 100mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,7,2
+Savithramma Menon,38,F,Girish Murthy,+919280613009,Otitis media on Amoxiclav,antibiotic_course,2026-07-16,ICU,Azithromycin 500mg,antibiotic,Watch,7,1
+Mallikarjun Math,7,M,Lalitha Murthy,+919916048218,Typhoid on Ceftriaxone,antibiotic_course,2026-06-12,Ward-4,Azithromycin 500mg,antibiotic,Watch,5,1
+Geetha Patil,46,F,Nagaraj Menon,+919976955647,Post-op hernia repair,wound_care,2026-07-25,Ward-4,Metronidazole 400mg,antibiotic,Watch,14,3
+Dharma Joshi,19,M,Rathnamma Kumar,+919942725534,Post-op knee replacement,wound_care,2026-07-15,Ward-1,Metronidazole 400mg,antibiotic,Watch,5,3
+Kalpana Siddappa,75,F,Vinod Iyer,+919387057426,Post-viral fatigue,fever_viral,2026-06-14,Ward-3,ORS packets,other,Access,7,4
+Bhagyashree Siddappa,20,F,Dinesh Nair,+919863854401,Post-op knee replacement,wound_care,2026-07-21,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Dharma Joshi,11,M,Manjula Bhat,+919780352629,UTI on Ciprofloxacin,antibiotic_course,2026-07-17,Pediatrics,Amoxicillin 500mg,antibiotic,Watch,7,3
+Anil Pai,2,M,Girija Swamy,+919931221434,Post-viral fatigue,fever_viral,2026-07-10,ICU,ORS packets,other,Access,14,4
+Dinesh Reddy,29,M,Rajeshwari Math,+919631196129,Abscess drainage,wound_care,2026-07-16,Cardiology,Amoxiclav 625mg,antibiotic,Watch,10,2
+Venkatesh Rathod,14,M,Parvathamma Patil,+919772355141,Dental infection on Metronidazole,antibiotic_course,2026-07-26,Ward-1,Ciprofloxacin 500mg,antibiotic,Watch,3,2
+Prakash Reddy,40,M,Latha Devi,+919270700744,Chikungunya recovery,fever_viral,2026-07-09,Ward-2,ORS packets + Paracetamol 500mg,other+other,Access,3,4
+Dinesh Devi,31,M,Fathima Naik,+919560883210,UTI on Ciprofloxacin,antibiotic_course,2026-07-25,Ward-1,Azithromycin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,14,2
+Girish Gowda,45,M,Lakshmamma Siddappa,+919977364141,Post-op cholecystectomy,wound_care,2026-07-19,Ward-3,Amoxiclav 625mg,antibiotic,Watch,3,2
+Vasantha Naik,19,F,Darshan Iyer,+919510943598,Wound infection on Cefixime,antibiotic_course,2026-06-12,Obstetrics,Ciprofloxacin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,3,2
+Bharath Devi,46,M,Rathnamma Bhat,+919875705487,Surgical site infection,wound_care,2026-06-18,Ward-3,Metronidazole 400mg,antibiotic,Watch,5,3
+Sarojini Hegde,17,F,Dinesh Gowdru,+919733050169,Skin infection on Clindamycin,antibiotic_course,2026-07-23,Pediatrics,Ciprofloxacin 500mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,5,2
+Nagaraj Kumar,79,M,Geetha Naik,+919405931388,Lower RTI on Azithromycin,antibiotic_course,2026-06-21,Obstetrics,Ciprofloxacin 500mg,antibiotic,Watch,14,2
+Manjula Naik,84,F,Krishna Iyer,+919158593156,Cellulitis on Amoxicillin,antibiotic_course,2026-07-21,ICU,Ciprofloxacin 500mg,antibiotic,Watch,14,2
+Padmavathi Prasad,42,F,Ramesh Kulkarni,+919241715543,Pilonidal sinus excision,wound_care,2026-07-22,Pediatrics,Amoxiclav 625mg,antibiotic,Watch,3,2
+Honnamma Swamy,35,F,Ganesh Gowda,+919331652222,Post-op appendectomy,wound_care,2026-07-17,Pediatrics,Metronidazole 400mg,antibiotic,Watch,10,3
+Umesh Shetty,70,M,Jyothi Murthy,+919761475488,Post-op hernia repair,wound_care,2026-07-26,Orthopedics,Amoxiclav 625mg,antibiotic,Watch,5,2
+Lingaraj Naik,83,M,Nagarathna Swamy,+919919505668,Post-viral fatigue,fever_viral,2026-07-05,Orthopedics,Paracetamol 500mg,other,Access,10,3
+Yashoda Bhat,9,F,Eshwar Kumar,+919432097676,Wound infection on Cefixime,antibiotic_course,2026-07-27,Ward-2,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Ashok Kulkarni,35,M,Anita Prasad,+919279275105,Surgical site infection,wound_care,2026-07-03,Orthopedics,Paracetamol 500mg,other,Access,3,3
+Ramesh Kudachi,69,M,Rajeshwari Menon,+919168582026,Pilonidal sinus excision,wound_care,2026-07-26,Obstetrics,Cefuroxime 500mg,antibiotic,Watch,3,2
+Ashok Swamy,22,M,Rathnamma Kulkarni,+919373928805,Otitis media on Amoxiclav,antibiotic_course,2026-07-03,Obstetrics,Ciprofloxacin 500mg,antibiotic,Watch,3,2
+Suma Gowda,62,F,Vijay Patil,+919490816787,C-section wound care,wound_care,2026-06-17,Ward-3,Paracetamol 500mg,other,Access,10,3
+Sharada Naik,42,F,Vijay Joshi,+919391261014,Viral gastroenteritis,fever_viral,2026-07-18,Ward-2,Paracetamol 500mg,other,Access,10,3
+Latha Bhat,41,F,Vinod Gowdru,+919451436694,Laceration repair,wound_care,2026-07-22,Ward-1,Ibuprofen 400mg,other,Access,7,2
+Chetan Nair,77,M,Thulasi Kulkarni,+919629741991,Dengue convalescence,fever_viral,2026-06-30,Emergency,Paracetamol 500mg + ORS packets,other+other,Access,3,4
+Thulasi Murthy,3,F,Basavaraj Devi,+919459722166,Post-op mastectomy,wound_care,2026-06-23,Pediatrics,Ibuprofen 400mg + Metronidazole 400mg,other+antibiotic,Access,5,3
+Kiran Pai,37,M,Parvathamma Kamath,+919199886596,Post-op knee replacement,wound_care,2026-07-21,Emergency,Ibuprofen 400mg,other,Access,3,2
+Thimmaiah Hegde,83,M,Yellamma Kamath,+919980428452,Pilonidal sinus excision,wound_care,2026-07-27,General-Surgery,Amoxiclav 625mg + Ibuprofen 400mg,antibiotic+other,Watch,7,2
+Dinesh Siddappa,59,M,Girija Naik,+919392010397,Post-op knee replacement,wound_care,2026-06-29,Ward-3,Metronidazole 400mg + Paracetamol 500mg,antibiotic+other,Watch,5,3
+Vijay Bhat,17,M,Girija Joshi,+919675444604,Post-op knee replacement,wound_care,2026-07-23,ICU,Ibuprofen 400mg,other,Access,3,2
+Girija Kudachi,79,F,Rahul Math,+919143303806,Diabetic foot ulcer,wound_care,2026-07-26,Ward-3,Amoxiclav 625mg,antibiotic,Watch,10,2
+Darshan Patil,24,M,Fathima Menon,+919133374137,Hep A convalescence,fever_viral,2026-07-01,Emergency,Paracetamol 500mg,other,Access,5,3
+Annapurna Gowda,30,F,Suresh Math,+919240354421,Post-op cholecystectomy,wound_care,2026-07-06,Cardiology,Paracetamol 500mg,other,Access,7,3
+Padmavathi Gowda,84,F,Ganesh Reddy,+919576130756,Post-viral fatigue,fever_viral,2026-07-26,Cardiology,ORS packets,other,Access,10,4
+Ashok Gowda,56,M,Manjula Rathod,+919285550328,C-section wound care,wound_care,2026-07-23,Orthopedics,Amoxiclav 625mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,14,3
+Vimala Devi,54,F,Vinod Pai,+919691297450,UTI on Ciprofloxacin,antibiotic_course,2026-07-21,Orthopedics,Cefixime 200mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,5,2
+Dharma Kudachi,4,M,Asha Kudachi,+919510704185,Skin infection on Clindamycin,antibiotic_course,2026-07-16,ICU,Cefixime 200mg,antibiotic,Watch,14,2
+Basavaraj Naik,25,M,Manjula Menon,+919127984900,Post-op knee replacement,wound_care,2026-06-20,Ward-1,Ibuprofen 400mg + Cefuroxime 500mg,other+antibiotic,Access,14,2
+Suresh Gowdru,22,M,Deepa Nair,+919207518427,Post-op knee replacement,wound_care,2026-07-16,Orthopedics,Paracetamol 500mg,other,Access,5,3
+Shankar Kudachi,24,M,Manjula Kulkarni,+919289086333,Diabetic foot ulcer,wound_care,2026-06-18,Cardiology,Paracetamol 500mg,other,Access,7,3
+Raghu Swamy,26,M,Padmavathi Swamy,+919998396384,Hep A convalescence,fever_viral,2026-07-23,Emergency,ORS packets + Paracetamol 500mg,other+other,Access,5,4
+Yogesh Nair,63,M,Gangamma Prasad,+919100733897,Pilonidal sinus excision,wound_care,2026-06-27,Ward-4,Ibuprofen 400mg,other,Access,7,2
+Kamala Gowda,20,F,Umesh Swamy,+919931469703,Burn wound management,wound_care,2026-06-15,Cardiology,Ibuprofen 400mg,other,Access,10,2
+Uday Hegde,43,M,Jayalakshmi Iyer,+919246513857,Influenza-like illness,fever_viral,2026-06-15,Obstetrics,ORS packets,other,Access,5,4
+Uday Math,41,M,Sarojini Desai,+919888121101,Wound infection on Cefixime,antibiotic_course,2026-07-03,Ward-3,Doxycycline 100mg,antibiotic,Watch,14,2
+Savithramma Rao,80,F,Dharma Naik,+919337184468,UTI on Ciprofloxacin,antibiotic_course,2026-07-26,ICU,Azithromycin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,5,3
+Eshwar Shetty,44,M,Jyothi Naik,+919579565240,Post-op knee replacement,wound_care,2026-07-06,Ward-4,Ibuprofen 400mg + Paracetamol 500mg,other+other,Access,3,3
+Vijaya Desai,55,F,Nagaraj Naik,+919278604541,Hep A convalescence,fever_viral,2026-07-22,Pediatrics,ORS packets,other,Access,14,4
+Sharada Rao,6,F,Nagaraj Shetty,+919416655712,Abscess drainage,wound_care,2026-07-27,Ward-2,Amoxiclav 625mg,antibiotic,Watch,5,2
+Padmavathi Murthy,78,F,Mahesh Naik,+919758896006,Viral fever with cough,fever_viral,2026-06-16,Pediatrics,Paracetamol 500mg,other,Access,10,3
+Girija Patil,28,F,Rajesh Naik,+919303994042,Burn wound management,wound_care,2026-07-24,Emergency,Ibuprofen 400mg + Paracetamol 500mg,other+other,Access,3,3
+Dinesh Swamy,64,M,Bhagya Math,+919264915937,Post-op appendectomy,wound_care,2026-07-26,Pediatrics,Metronidazole 400mg,antibiotic,Watch,3,3
+Parvathamma Reddy,39,F,Naveen Devi,+919187978213,UTI on Ciprofloxacin,antibiotic_course,2026-06-28,Orthopedics,Cefixime 200mg,antibiotic,Watch,7,2
+Sarojini Devi,25,F,Veeresh Desai,+919498380251,Viral gastroenteritis,fever_viral,2026-07-20,Ward-3,ORS packets,other,Access,7,4
+Sharada Math,9,F,Sunil Swamy,+919262275325,UTI on Ciprofloxacin,antibiotic_course,2026-07-08,Ward-2,Doxycycline 100mg,antibiotic,Watch,14,2
+Thulasi Murthy,51,F,Suresh Math,+919978755907,Typhoid on Ceftriaxone,antibiotic_course,2026-06-22,Obstetrics,Cefixime 200mg,antibiotic,Watch,5,2
+Vinod Iyer,6,M,Suma Desai,+919639127345,Typhoid on Ceftriaxone,antibiotic_course,2026-07-07,General-Surgery,Doxycycline 100mg + Cefixime 200mg,antibiotic+antibiotic,Watch,5,2
+Jayalakshmi Reddy,7,F,Prakash Kamath,+919554595339,Post-op mastectomy,wound_care,2026-07-25,Pediatrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Jyothi Naik,51,F,Ganesh Shetty,+919697391512,Diabetic foot ulcer,wound_care,2026-07-17,Orthopedics,Paracetamol 500mg,other,Access,14,3
+Uday Prasad,55,M,Pushpa Hegde,+919260677223,Pilonidal sinus excision,wound_care,2026-07-01,General-Surgery,Paracetamol 500mg,other,Access,14,3
+Tulasi Kudachi,46,F,Vinod Murthy,+919541189818,Post-op mastectomy,wound_care,2026-07-15,ICU,Cefuroxime 500mg + Ibuprofen 400mg,antibiotic+other,Watch,10,2
+Durga Kumar,53,F,Dharma Rathod,+919141642429,Diabetic foot ulcer,wound_care,2026-07-27,Ward-4,Cefuroxime 500mg,antibiotic,Watch,7,2
+Honnamma Naik,37,F,Rahul Iyer,+919627872109,Post-viral fatigue,fever_viral,2026-07-26,Ward-4,ORS packets,other,Access,7,4
+Asha Naik,84,F,Lingaraj Kumar,+919195871030,Post-op knee replacement,wound_care,2026-07-02,Pediatrics,Metronidazole 400mg,antibiotic,Watch,3,3
+Darshan Kudachi,41,M,Rathnamma Shetty,+919861894343,Wound infection on Cefixime,antibiotic_course,2026-06-21,Emergency,Azithromycin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,3,2
+Vimala Patil,48,F,Pramod Patil,+919856594938,Diabetic foot ulcer,wound_care,2026-07-18,ICU,Paracetamol 500mg,other,Access,5,3
+Mahesh Pai,24,M,Geetha Bhat,+919609578849,Skin infection on Clindamycin,antibiotic_course,2026-07-25,Cardiology,Amoxicillin 500mg,antibiotic,Watch,3,3
+Chitra Gowda,22,F,Gopal Patil,+919714457408,Cellulitis on Amoxicillin,antibiotic_course,2026-07-09,Ward-4,Ciprofloxacin 500mg + Cefixime 200mg,antibiotic+antibiotic,Watch,14,2
+Honnamma Gowdru,18,F,Ramesh Pai,+919795109916,Post-op appendectomy,wound_care,2026-07-24,Ward-4,Ibuprofen 400mg,other,Access,7,2
+Prakash Desai,34,M,Kaveri Bhat,+919334300190,Typhoid on Ceftriaxone,antibiotic_course,2026-07-21,General-Surgery,Azithromycin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,14,3
+Veeresh Kumar,15,M,Durga Iyer,+919617262695,Abscess drainage,wound_care,2026-07-23,Obstetrics,Ibuprofen 400mg,other,Access,5,2
+Fathima Prasad,78,F,Vijay Patil,+919533897383,Wound infection on Cefixime,antibiotic_course,2026-07-09,Ward-1,Amoxicillin 500mg + Cefixime 200mg,antibiotic+antibiotic,Watch,10,3
+Santosh Naik,75,M,Honnamma Swamy,+919976189113,Surgical site infection,wound_care,2026-07-06,Ward-4,Cefuroxime 500mg,antibiotic,Watch,7,2
+Basavaraj Iyer,73,M,Rathnamma Math,+919294493146,Laceration repair,wound_care,2026-07-02,Ward-3,Metronidazole 400mg,antibiotic,Watch,5,3
+Ramesh Devi,47,M,Suma Nair,+919339796534,Pneumonia on Levofloxacin,antibiotic_course,2026-06-28,Pediatrics,Amoxicillin 500mg,antibiotic,Watch,14,3
+Deepa Bhat,8,F,Santosh Pai,+919781178315,Otitis media on Amoxiclav,antibiotic_course,2026-07-19,Ward-2,Ciprofloxacin 500mg,antibiotic,Watch,10,2
+Krishna Iyer,21,M,Pushpa Patil,+919247494816,Viral gastroenteritis,fever_viral,2026-06-13,Pediatrics,ORS packets + Paracetamol 500mg,other+other,Access,3,4
+Arun Naik,42,M,Jyothi Rao,+919781288086,Laceration repair,wound_care,2026-07-25,Orthopedics,Amoxiclav 625mg,antibiotic,Watch,5,2
+Arun Kudachi,80,M,Suma Kamath,+919565694083,Pharyngitis on Amoxicillin,antibiotic_course,2026-06-14,Pediatrics,Cefixime 200mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,5,2
+Mahesh Gowda,69,M,Girija Gowdru,+919304630191,Post-op appendectomy,wound_care,2026-07-03,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Indu Kamath,66,F,Rajesh Desai,+919732080338,Post-op hernia repair,wound_care,2026-07-23,Ward-1,Ibuprofen 400mg,other,Access,14,2
+Veeresh Prasad,19,M,Jayalakshmi Joshi,+919468006578,Hep A convalescence,fever_viral,2026-07-01,Cardiology,Paracetamol 500mg,other,Access,10,3
+Honnamma Nair,18,F,Girish Naik,+919326763783,Otitis media on Amoxiclav,antibiotic_course,2026-07-25,Emergency,Amoxicillin 500mg,antibiotic,Watch,3,3
+Rajesh Devi,70,M,Bhagyashree Gowdru,+919769085879,Post-op appendectomy,wound_care,2026-07-26,Obstetrics,Paracetamol 500mg,other,Access,10,3
+Girish Desai,34,M,Kamala Murthy,+919609379184,Cellulitis on Amoxicillin,antibiotic_course,2026-07-11,Obstetrics,Amoxicillin 500mg,antibiotic,Watch,3,3
+Gopal Menon,19,M,Indu Kumar,+919549710722,Post-viral fatigue,fever_viral,2026-07-04,Emergency,Paracetamol 500mg,other,Access,10,3
+Nagarathna Kumar,35,F,Prakash Gowdru,+919992815061,Cellulitis on Amoxicillin,antibiotic_course,2026-07-05,Cardiology,Amoxicillin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,10,3
+Pushpa Siddappa,32,F,Raghu Naik,+919102939907,Post-op hernia repair,wound_care,2026-06-25,Ward-2,Cefuroxime 500mg + Paracetamol 500mg,antibiotic+other,Watch,14,3
+Padmavathi Naik,84,F,Rajesh Menon,+919348206466,Pneumonia on Levofloxacin,antibiotic_course,2026-07-19,Orthopedics,Azithromycin 500mg,antibiotic,Watch,3,1
+Deepa Kulkarni,16,F,Arun Joshi,+919202003827,Viral fever with cough,fever_viral,2026-06-23,Ward-1,Paracetamol 500mg,other,Access,10,3
+Chetan Menon,45,M,Suma Kulkarni,+919296354549,Post-op cholecystectomy,wound_care,2026-07-24,ICU,Cefuroxime 500mg,antibiotic,Watch,10,2
+Kiran Devi,18,M,Rathnamma Hegde,+919847506709,Wound infection on Cefixime,antibiotic_course,2026-07-21,Ward-2,Doxycycline 100mg,antibiotic,Watch,14,2
+Girish Rao,47,M,Indu Desai,+919756441105,Post-op mastectomy,wound_care,2026-07-18,Ward-3,Cefuroxime 500mg,antibiotic,Watch,10,2
+Suma Shetty,42,F,Anil Devi,+919113271672,Typhoid on Ceftriaxone,antibiotic_course,2026-07-03,General-Surgery,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Gopal Prasad,57,M,Indu Hegde,+919810509206,Dental infection on Metronidazole,antibiotic_course,2026-07-08,Cardiology,Cefixime 200mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,14,2
+Vijaya Gowda,62,F,Naveen Prasad,+919632398698,Post-viral fatigue,fever_viral,2026-07-23,ICU,ORS packets,other,Access,3,4
+Basavaraj Nair,50,M,Bhagya Devi,+919533015368,Post-viral fatigue,fever_viral,2026-07-20,ICU,ORS packets,other,Access,10,4
+Jyothi Hegde,4,F,Shankar Naik,+919210212429,Post-op appendectomy,wound_care,2026-07-16,Emergency,Paracetamol 500mg,other,Access,14,3
+Eshwar Iyer,28,M,Yellamma Murthy,+919802867083,Skin infection on Clindamycin,antibiotic_course,2026-06-25,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Pramod Gowdru,62,M,Indu Kumar,+919869505738,Dental infection on Metronidazole,antibiotic_course,2026-07-26,Ward-2,Ciprofloxacin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,7,3
+Nagaraj Prasad,15,M,Lalitha Siddappa,+919149153870,Hep A convalescence,fever_viral,2026-06-26,Ward-3,ORS packets + Paracetamol 500mg,other+other,Access,5,4
+Annapurna Desai,26,F,Ravi Bhat,+919869645166,Post-op cholecystectomy,wound_care,2026-06-17,Ward-1,Metronidazole 400mg + Cefuroxime 500mg,antibiotic+antibiotic,Watch,10,3
+Uday Prasad,2,M,Latha Pai,+919669474377,Typhoid on Ceftriaxone,antibiotic_course,2026-06-24,Pediatrics,Cefixime 200mg,antibiotic,Watch,5,2
+Thimmaiah Rao,51,M,Latha Hegde,+919806008664,Skin infection on Clindamycin,antibiotic_course,2026-06-21,Emergency,Cefixime 200mg,antibiotic,Watch,5,2
+Bhagya Desai,59,F,Ashok Iyer,+919964144020,Post-op cholecystectomy,wound_care,2026-07-05,General-Surgery,Metronidazole 400mg,antibiotic,Watch,7,3
+Nagaraj Devi,28,M,Vasantha Reddy,+919770194841,Skin infection on Clindamycin,antibiotic_course,2026-07-26,Obstetrics,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Yashoda Gowdru,63,F,Basavaraj Murthy,+919725783470,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-01,Obstetrics,Doxycycline 100mg + Cefixime 200mg,antibiotic+antibiotic,Watch,3,2
+Gopal Hegde,20,M,Gangamma Desai,+919156978109,Cellulitis on Amoxicillin,antibiotic_course,2026-07-01,Orthopedics,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Durga Math,39,F,Suresh Siddappa,+919319044298,Lower RTI on Azithromycin,antibiotic_course,2026-06-26,Cardiology,Azithromycin 500mg,antibiotic,Watch,14,1
+Sharada Naik,32,F,Yogesh Desai,+919648598641,Pneumonia on Levofloxacin,antibiotic_course,2026-07-27,Obstetrics,Cefixime 200mg,antibiotic,Watch,7,2
+Nagaraj Patil,34,M,Lakshmamma Naik,+919318063243,Dental infection on Metronidazole,antibiotic_course,2026-06-18,Ward-4,Amoxicillin 500mg,antibiotic,Watch,14,3
+Yogesh Reddy,59,M,Tulasi Iyer,+919290509600,Post-viral fatigue,fever_viral,2026-06-14,Ward-3,Paracetamol 500mg,other,Access,10,3
+Bhagya Murthy,22,F,Anil Kamath,+919727050254,Viral fever with cough,fever_viral,2026-07-19,Cardiology,Paracetamol 500mg + ORS packets,other+other,Access,14,4
+Vijaya Gowdru,40,F,Eshwar Math,+919626725060,Typhoid on Ceftriaxone,antibiotic_course,2026-07-27,Cardiology,Amoxicillin 500mg,antibiotic,Watch,5,3
+Gopal Shetty,55,M,Yellamma Rao,+919683127878,UTI on Ciprofloxacin,antibiotic_course,2026-07-24,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Ganesh Iyer,81,M,Vasantha Gowdru,+919669618855,Typhoid on Ceftriaxone,antibiotic_course,2026-07-27,Obstetrics,Amoxicillin 500mg,antibiotic,Watch,14,3
+Chetan Nair,43,M,Honnamma Rathod,+919509495719,Post-viral fatigue,fever_viral,2026-07-24,Pediatrics,ORS packets,other,Access,14,4
+Darshan Bhat,39,M,Vimala Patil,+919799573076,Burn wound management,wound_care,2026-06-16,Ward-2,Amoxiclav 625mg,antibiotic,Watch,14,2
+Lingaraj Gowda,28,M,Jyothi Shetty,+919819766863,Cellulitis on Amoxicillin,antibiotic_course,2026-07-20,Obstetrics,Azithromycin 500mg + Cefixime 200mg,antibiotic+antibiotic,Watch,3,2
+Fathima Gowda,44,F,Pramod Siddappa,+919140680121,Post-op appendectomy,wound_care,2026-06-28,Ward-3,Metronidazole 400mg + Amoxiclav 625mg,antibiotic+antibiotic,Watch,7,3
+Naveen Desai,53,M,Sharada Devi,+919564957091,Post-op cholecystectomy,wound_care,2026-07-26,Obstetrics,Paracetamol 500mg,other,Access,14,3
+Latha Gowdru,11,F,Chetan Patil,+919484077593,Post-viral fatigue,fever_viral,2026-06-28,Orthopedics,ORS packets,other,Access,7,4
+Girish Desai,5,M,Nagarathna Math,+919608940398,Post-op knee replacement,wound_care,2026-07-02,Ward-3,Metronidazole 400mg + Amoxiclav 625mg,antibiotic+antibiotic,Watch,7,3
+Mahesh Gowda,20,M,Bhagya Murthy,+919232322744,Pilonidal sinus excision,wound_care,2026-07-21,General-Surgery,Metronidazole 400mg,antibiotic,Watch,7,3
+Pushpa Naik,54,F,Basavaraj Reddy,+919793563667,Fever with chills,fever_viral,2026-07-25,Ward-3,ORS packets + Paracetamol 500mg,other+other,Access,14,4
+Vijaya Gowdru,84,F,Yogesh Bhat,+919690197884,Post-op mastectomy,wound_care,2026-07-24,Ward-2,Amoxiclav 625mg,antibiotic,Watch,10,2
+Ramesh Kulkarni,32,M,Latha Rathod,+919207422565,Post-op hernia repair,wound_care,2026-07-23,Ward-4,Cefuroxime 500mg,antibiotic,Watch,7,2
+Thimmaiah Kamath,48,M,Chitra Swamy,+919967261018,Post-op cholecystectomy,wound_care,2026-07-27,Ward-3,Amoxiclav 625mg,antibiotic,Watch,10,2
+Bhagya Math,44,F,Darshan Kamath,+919615346649,Skin infection on Clindamycin,antibiotic_course,2026-07-18,Orthopedics,Azithromycin 500mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,3,2
+Bhagya Math,27,F,Dinesh Murthy,+919382646055,UTI on Ciprofloxacin,antibiotic_course,2026-06-20,Ward-2,Doxycycline 100mg,antibiotic,Watch,14,2
+Thimmaiah Desai,6,M,Deepa Reddy,+919692269551,Burn wound management,wound_care,2026-07-09,ICU,Amoxiclav 625mg,antibiotic,Watch,5,2
+Uday Naik,61,M,Durga Kamath,+919638076911,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-18,Cardiology,Ciprofloxacin 500mg,antibiotic,Watch,14,2
+Jayalakshmi Gowdru,59,F,Thimmaiah Kamath,+919270963770,Pilonidal sinus excision,wound_care,2026-06-22,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,10,2
+Suresh Patil,64,M,Yashoda Gowdru,+919348839570,Diabetic foot ulcer,wound_care,2026-07-27,Ward-4,Amoxiclav 625mg,antibiotic,Watch,7,2
+Santosh Pai,7,M,Thulasi Patil,+919796348146,Surgical site infection,wound_care,2026-07-10,Emergency,Ibuprofen 400mg,other,Access,7,2
+Thimmaiah Murthy,50,M,Chitra Rao,+919801878526,Pilonidal sinus excision,wound_care,2026-06-20,Obstetrics,Paracetamol 500mg,other,Access,10,3
+Sharada Prasad,46,F,Krishna Kulkarni,+919622763616,Otitis media on Amoxiclav,antibiotic_course,2026-07-18,Ward-1,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Padmavathi Prasad,21,F,Sunil Reddy,+919300688440,Pilonidal sinus excision,wound_care,2026-07-08,Ward-2,Cefuroxime 500mg,antibiotic,Watch,3,2
+Rahul Rathod,28,M,Umadevi Pai,+919734356903,Post-op cholecystectomy,wound_care,2026-07-24,Ward-1,Amoxiclav 625mg,antibiotic,Watch,5,2
+Chandrakala Devi,75,F,Thimmaiah Patil,+919257695200,Abscess drainage,wound_care,2026-07-17,Ward-3,Cefuroxime 500mg,antibiotic,Watch,14,2
+Eshwar Gowda,29,M,Durga Shetty,+919582328432,Dental infection on Metronidazole,antibiotic_course,2026-07-25,ICU,Cefixime 200mg,antibiotic,Watch,14,2
+Lalitha Kumar,23,F,Thimmaiah Menon,+919877589651,Dental infection on Metronidazole,antibiotic_course,2026-07-14,General-Surgery,Ciprofloxacin 500mg,antibiotic,Watch,5,2
+Vasantha Gowda,66,F,Prakash Prasad,+919834834366,C-section wound care,wound_care,2026-07-26,General-Surgery,Cefuroxime 500mg,antibiotic,Watch,14,2
+Savithramma Kudachi,17,F,Veeresh Prasad,+919200061963,Wound infection on Cefixime,antibiotic_course,2026-07-16,General-Surgery,Azithromycin 500mg,antibiotic,Watch,10,1
+Gopal Joshi,69,M,Lalitha Patil,+919560588284,Laceration repair,wound_care,2026-07-22,Pediatrics,Metronidazole 400mg + Amoxiclav 625mg,antibiotic+antibiotic,Watch,7,3
+Rahul Gowdru,38,M,Yashoda Shetty,+919742411514,Influenza-like illness,fever_viral,2026-07-25,Orthopedics,Paracetamol 500mg,other,Access,3,3
+Gopal Gowda,28,M,Manjula Devi,+919838483906,Influenza-like illness,fever_viral,2026-07-26,Cardiology,ORS packets,other,Access,7,4
+Anita Murthy,48,F,Mallikarjun Swamy,+919757001875,Post-op mastectomy,wound_care,2026-07-01,Pediatrics,Cefuroxime 500mg,antibiotic,Watch,14,2
+Rahul Rao,73,M,Lalitha Murthy,+919619433519,Abscess drainage,wound_care,2026-07-22,General-Surgery,Cefuroxime 500mg,antibiotic,Watch,3,2
+Thulasi Bhat,29,F,Naveen Hegde,+919645829727,Diabetic foot ulcer,wound_care,2026-07-12,Emergency,Paracetamol 500mg,other,Access,3,3
+Durga Pai,13,F,Dharma Joshi,+919168805869,Diabetic foot ulcer,wound_care,2026-07-12,Ward-2,Cefuroxime 500mg,antibiotic,Watch,10,2
+Bharath Devi,78,M,Anita Iyer,+919161700457,Fever with chills,fever_viral,2026-07-18,Obstetrics,Paracetamol 500mg + ORS packets,other+other,Access,5,4
+Savithramma Kudachi,68,F,Dharma Prasad,+919849954690,C-section wound care,wound_care,2026-07-27,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,5,2
+Sarojini Menon,52,F,Krishna Kulkarni,+919535349662,Typhoid on Ceftriaxone,antibiotic_course,2026-07-02,Ward-1,Azithromycin 500mg,antibiotic,Watch,14,1
+Chitra Naik,46,F,Yogesh Swamy,+919473098534,Chikungunya recovery,fever_viral,2026-07-13,Ward-4,Paracetamol 500mg,other,Access,10,3
+Shankar Gowda,54,M,Bhagyashree Rao,+919643569021,Post-op hernia repair,wound_care,2026-07-23,Emergency,Paracetamol 500mg,other,Access,7,3
+Lingaraj Math,58,M,Chitra Menon,+919504886868,Cellulitis on Amoxicillin,antibiotic_course,2026-06-15,Cardiology,Cefixime 200mg,antibiotic,Watch,14,2
+Parvathamma Pai,10,F,Santosh Menon,+919510892271,Cellulitis on Amoxicillin,antibiotic_course,2026-07-05,Obstetrics,Amoxicillin 500mg,antibiotic,Watch,7,3
+Gopal Murthy,35,M,Lakshmamma Siddappa,+919366564581,Post-op cholecystectomy,wound_care,2026-07-01,Obstetrics,Ibuprofen 400mg + Amoxiclav 625mg,other+antibiotic,Access,10,2
+Jyothi Kulkarni,36,F,Ravi Swamy,+919296263306,Dengue convalescence,fever_viral,2026-07-02,ICU,Paracetamol 500mg,other,Access,7,3
+Pushpa Nair,33,F,Prakash Math,+919998007554,Wound infection on Cefixime,antibiotic_course,2026-07-26,Ward-2,Azithromycin 500mg,antibiotic,Watch,10,1
+Bharath Gowda,63,M,Asha Patil,+919498569245,Dental infection on Metronidazole,antibiotic_course,2026-06-22,General-Surgery,Cefixime 200mg + Doxycycline 100mg,antibiotic+antibiotic,Watch,7,2
+Dinesh Nair,8,M,Chitra Kamath,+919664504128,Dental infection on Metronidazole,antibiotic_course,2026-07-27,Emergency,Amoxicillin 500mg,antibiotic,Watch,5,3
+Anil Hegde,42,M,Anita Bhat,+919840034196,Post-op mastectomy,wound_care,2026-07-22,Ward-4,Paracetamol 500mg,other,Access,14,3
+Anita Rao,32,F,Yogesh Menon,+919389274886,Otitis media on Amoxiclav,antibiotic_course,2026-07-22,Cardiology,Cefixime 200mg,antibiotic,Watch,10,2
+Mahesh Kulkarni,59,M,Nagarathna Menon,+919293154584,Otitis media on Amoxiclav,antibiotic_course,2026-07-24,Obstetrics,Azithromycin 500mg,antibiotic,Watch,5,1
+Pramod Joshi,20,M,Manjula Reddy,+919959033676,Fever with chills,fever_viral,2026-06-27,ICU,Paracetamol 500mg,other,Access,5,3
+Dharma Prasad,42,M,Asha Naik,+919943244821,Pneumonia on Levofloxacin,antibiotic_course,2026-06-23,Emergency,Azithromycin 500mg,antibiotic,Watch,5,1
+Kamala Reddy,82,F,Anil Pai,+919203403365,Diabetic foot ulcer,wound_care,2026-07-22,Orthopedics,Metronidazole 400mg,antibiotic,Watch,7,3
+Manjunath Gowda,46,M,Pushpa Hegde,+919829699746,Dengue convalescence,fever_viral,2026-07-15,General-Surgery,Paracetamol 500mg,other,Access,7,3
+Suresh Naik,59,M,Yellamma Pai,+919184189438,Abscess drainage,wound_care,2026-07-11,ICU,Amoxiclav 625mg,antibiotic,Watch,7,2
+Kiran Devi,53,M,Indu Swamy,+919176605123,Diabetic foot ulcer,wound_care,2026-07-23,Ward-4,Ibuprofen 400mg,other,Access,14,2
+Dinesh Menon,48,M,Sharada Gowdru,+919903046674,Dental infection on Metronidazole,antibiotic_course,2026-07-25,Pediatrics,Azithromycin 500mg + Ciprofloxacin 500mg,antibiotic+antibiotic,Watch,7,2
+Rathnamma Reddy,15,F,Naveen Desai,+919202600029,Laceration repair,wound_care,2026-07-27,Emergency,Cefuroxime 500mg,antibiotic,Watch,3,2
+Vasantha Menon,12,F,Eshwar Kamath,+919803121225,Influenza-like illness,fever_viral,2026-07-24,Orthopedics,ORS packets,other,Access,5,4
+Bhagyashree Prasad,6,F,Naveen Gowda,+919812480457,Diabetic foot ulcer,wound_care,2026-07-19,ICU,Metronidazole 400mg,antibiotic,Watch,14,3
+Girish Kamath,77,M,Asha Rao,+919741651145,Otitis media on Amoxiclav,antibiotic_course,2026-07-17,Pediatrics,Doxycycline 100mg,antibiotic,Watch,7,2
+Rahul Murthy,13,M,Yashoda Kudachi,+919574443895,Post-op cholecystectomy,wound_care,2026-07-25,Orthopedics,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,7,3
+Chitra Pai,64,F,Veeresh Gowda,+919911182636,Lower RTI on Azithromycin,antibiotic_course,2026-06-27,Pediatrics,Doxycycline 100mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,14,2
+Mahesh Reddy,57,M,Pushpa Murthy,+919523861817,Surgical site infection,wound_care,2026-07-21,Obstetrics,Cefuroxime 500mg + Paracetamol 500mg,antibiotic+other,Watch,10,3
+Dharma Nair,80,M,Anita Gowdru,+919967126986,Pneumonia on Levofloxacin,antibiotic_course,2026-07-09,Orthopedics,Doxycycline 100mg,antibiotic,Watch,10,2
+Manjula Shetty,39,F,Kiran Kamath,+919218494225,Otitis media on Amoxiclav,antibiotic_course,2026-07-24,ICU,Doxycycline 100mg,antibiotic,Watch,7,2
+Honnamma Kamath,4,F,Suresh Murthy,+919299648970,Chikungunya recovery,fever_viral,2026-07-26,Orthopedics,ORS packets,other,Access,5,4
+Sarojini Kamath,29,F,Ramesh Pai,+919467126134,Laceration repair,wound_care,2026-07-19,Cardiology,Paracetamol 500mg,other,Access,5,3
+Kamala Menon,71,F,Krishna Shetty,+919604816257,Abscess drainage,wound_care,2026-06-25,Pediatrics,Paracetamol 500mg,other,Access,5,3
+Santosh Gowdru,6,M,Sharada Nair,+919313867761,UTI on Ciprofloxacin,antibiotic_course,2026-07-08,Emergency,Ciprofloxacin 500mg,antibiotic,Watch,7,2
+Kalpana Rao,72,F,Manjunath Naik,+919659340310,Laceration repair,wound_care,2026-07-23,Obstetrics,Ibuprofen 400mg,other,Access,5,2
+Yashoda Nair,3,F,Mallikarjun Naik,+919279701810,Otitis media on Amoxiclav,antibiotic_course,2026-07-21,Ward-2,Ciprofloxacin 500mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,14,2
+Vinod Siddappa,49,M,Geetha Kamath,+919927636977,C-section wound care,wound_care,2026-07-26,ICU,Metronidazole 400mg,antibiotic,Watch,3,3
+Kamala Kulkarni,70,F,Umesh Siddappa,+919949830412,Laceration repair,wound_care,2026-07-23,Ward-4,Metronidazole 400mg,antibiotic,Watch,7,3
+Girish Naik,50,M,Tulasi Gowda,+919484579421,Pneumonia on Levofloxacin,antibiotic_course,2026-07-18,Ward-1,Cefixime 200mg,antibiotic,Watch,14,2
+Arun Reddy,71,M,Chitra Rao,+919473302105,Laceration repair,wound_care,2026-06-22,Orthopedics,Metronidazole 400mg,antibiotic,Watch,14,3
+Girija Shetty,59,F,Uday Kamath,+919417476097,Viral gastroenteritis,fever_viral,2026-07-27,ICU,ORS packets,other,Access,3,4
+Chetan Kulkarni,43,M,Indu Nair,+919874171682,Burn wound management,wound_care,2026-07-25,Pediatrics,Cefuroxime 500mg,antibiotic,Watch,5,2
+Bharath Iyer,84,M,Girija Joshi,+919445770698,Burn wound management,wound_care,2026-07-27,Obstetrics,Amoxiclav 625mg + Paracetamol 500mg,antibiotic+other,Watch,5,3
+Vasantha Pai,6,F,Prakash Hegde,+919713119661,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-18,Obstetrics,Doxycycline 100mg,antibiotic,Watch,7,2
+Vijaya Kulkarni,11,F,Girish Kumar,+919114051099,Dengue convalescence,fever_viral,2026-07-18,Obstetrics,Paracetamol 500mg,other,Access,3,3
+Ganesh Murthy,49,M,Pushpa Math,+919952818991,Otitis media on Amoxiclav,antibiotic_course,2026-07-17,Orthopedics,Azithromycin 500mg,antibiotic,Watch,3,1
+Rajeshwari Prasad,31,F,Rajesh Hegde,+919670866707,Post-op knee replacement,wound_care,2026-07-09,Emergency,Metronidazole 400mg,antibiotic,Watch,5,3
+Pramod Naik,15,M,Bhagya Joshi,+919922790554,Skin infection on Clindamycin,antibiotic_course,2026-07-19,Obstetrics,Cefixime 200mg,antibiotic,Watch,5,2
+Lalitha Murthy,45,F,Krishna Prasad,+919806019487,Pilonidal sinus excision,wound_care,2026-06-17,ICU,Ibuprofen 400mg,other,Access,7,2
+Mahesh Joshi,43,M,Jyothi Joshi,+919753278884,Burn wound management,wound_care,2026-07-22,Ward-4,Metronidazole 400mg,antibiotic,Watch,7,3
+Ganesh Bhat,2,M,Sharada Desai,+919879872949,Abscess drainage,wound_care,2026-07-27,General-Surgery,Amoxiclav 625mg,antibiotic,Watch,7,2
+Lakshmamma Iyer,42,F,Girish Reddy,+919123301671,Pneumonia on Levofloxacin,antibiotic_course,2026-07-17,Emergency,Doxycycline 100mg,antibiotic,Watch,5,2
+Tulasi Patil,21,F,Pramod Kulkarni,+919248614668,Pilonidal sinus excision,wound_care,2026-07-24,Ward-4,Ibuprofen 400mg + Cefuroxime 500mg,other+antibiotic,Access,14,2
+Rajeshwari Naik,43,F,Ganesh Naik,+919951374399,Dental infection on Metronidazole,antibiotic_course,2026-06-26,General-Surgery,Azithromycin 500mg,antibiotic,Watch,7,1
+Savithramma Naik,12,F,Bharath Desai,+919937649523,Diabetic foot ulcer,wound_care,2026-06-21,Cardiology,Cefuroxime 500mg,antibiotic,Watch,3,2
+Thulasi Naik,83,F,Dharma Gowda,+919934746883,Lower RTI on Azithromycin,antibiotic_course,2026-07-17,Orthopedics,Amoxicillin 500mg,antibiotic,Watch,5,3
+Kalpana Prasad,8,F,Girish Kamath,+919823310328,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-01,ICU,Doxycycline 100mg,antibiotic,Watch,5,2
+Ravi Iyer,18,M,Nagarathna Kamath,+919460957835,Pilonidal sinus excision,wound_care,2026-07-16,Ward-1,Ibuprofen 400mg + Metronidazole 400mg,other+antibiotic,Access,10,3
+Bhagyashree Gowdru,73,F,Dinesh Pai,+919312717408,Otitis media on Amoxiclav,antibiotic_course,2026-07-15,Ward-4,Doxycycline 100mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,7,2
+Ravi Naik,16,M,Chitra Shetty,+919821283444,Diabetic foot ulcer,wound_care,2026-07-25,Cardiology,Ibuprofen 400mg,other,Access,3,2
+Indu Rao,58,F,Basavaraj Kumar,+919769136744,Post-op appendectomy,wound_care,2026-07-25,Ward-4,Ibuprofen 400mg + Paracetamol 500mg,other+other,Access,3,3
+Vijaya Nair,38,F,Eshwar Kamath,+919114746008,Post-op hernia repair,wound_care,2026-07-20,Orthopedics,Paracetamol 500mg,other,Access,14,3
+Rajeshwari Reddy,35,F,Veeresh Prasad,+919689269569,Wound infection on Cefixime,antibiotic_course,2026-07-27,Obstetrics,Doxycycline 100mg,antibiotic,Watch,14,2
+Suma Menon,38,F,Naveen Patil,+919315495749,Otitis media on Amoxiclav,antibiotic_course,2026-07-27,Orthopedics,Azithromycin 500mg + Amoxicillin 500mg,antibiotic+antibiotic,Watch,7,3
+Vasantha Gowda,51,F,Vinod Devi,+919348215410,Post-viral fatigue,fever_viral,2026-07-18,Cardiology,Paracetamol 500mg + ORS packets,other+other,Access,14,4
+Honnamma Patil,41,F,Vijay Prasad,+919458167668,Wound infection on Cefixime,antibiotic_course,2026-07-22,Ward-1,Amoxicillin 500mg,antibiotic,Watch,7,3
+Umadevi Prasad,9,F,Sunil Kudachi,+919771939435,Post-op cholecystectomy,wound_care,2026-06-16,Ward-1,Ibuprofen 400mg,other,Access,10,2
+Chandrakala Shetty,80,F,Gopal Prasad,+919771651925,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-15,Ward-4,Cefixime 200mg,antibiotic,Watch,14,2
+Ramesh Bhat,28,M,Asha Kamath,+919800587168,Burn wound management,wound_care,2026-06-27,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,14,2
+Chandrakala Joshi,74,F,Umesh Devi,+919269702658,Burn wound management,wound_care,2026-06-16,Emergency,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,3,3
+Jyothi Joshi,58,F,Lingaraj Iyer,+919900592344,Chikungunya recovery,fever_viral,2026-06-29,Ward-3,Paracetamol 500mg,other,Access,14,3
+Bharath Menon,80,M,Geetha Swamy,+919347939168,Cellulitis on Amoxicillin,antibiotic_course,2026-07-27,Obstetrics,Azithromycin 500mg,antibiotic,Watch,10,1
+Chandrakala Prasad,49,F,Dharma Pai,+919297543237,Hep A convalescence,fever_viral,2026-07-26,ICU,Paracetamol 500mg + ORS packets,other+other,Access,3,4
+Asha Joshi,27,F,Girish Naik,+919913656416,C-section wound care,wound_care,2026-06-22,ICU,Cefuroxime 500mg,antibiotic,Watch,10,2
+Vimala Joshi,7,F,Krishna Gowdru,+919752759821,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-21,Cardiology,Doxycycline 100mg,antibiotic,Watch,14,2
+Savithramma Prasad,60,F,Rajesh Bhat,+919987995334,Dengue convalescence,fever_viral,2026-07-16,Emergency,Paracetamol 500mg,other,Access,14,3
+Dharma Patil,58,M,Tulasi Iyer,+919527392079,Chikungunya recovery,fever_viral,2026-07-25,ICU,ORS packets,other,Access,3,4
+Gopal Kamath,84,M,Thulasi Math,+919585007134,Burn wound management,wound_care,2026-07-25,Ward-2,Metronidazole 400mg,antibiotic,Watch,14,3
+Chandrakala Desai,59,F,Lingaraj Naik,+919126749178,Pilonidal sinus excision,wound_care,2026-06-21,Ward-4,Paracetamol 500mg + Amoxiclav 625mg,other+antibiotic,Access,3,3
+Sarojini Hegde,48,F,Nagaraj Devi,+919191597206,Pharyngitis on Amoxicillin,antibiotic_course,2026-07-12,Emergency,Ciprofloxacin 500mg,antibiotic,Watch,10,2
+Suma Gowdru,74,F,Naveen Naik,+919808165309,Fever with chills,fever_viral,2026-07-25,Ward-3,Paracetamol 500mg,other,Access,7,3
+Vijay Iyer,17,M,Jyothi Rao,+919241273318,Viral fever with cough,fever_viral,2026-06-30,General-Surgery,Paracetamol 500mg,other,Access,10,3
+Mallikarjun Kudachi,65,M,Lakshmamma Kumar,+919355419939,Post-op mastectomy,wound_care,2026-07-20,ICU,Cefuroxime 500mg + Metronidazole 400mg,antibiotic+antibiotic,Watch,3,3
+Vimala Murthy,82,F,Sunil Kumar,+919698663298,Dengue convalescence,fever_viral,2026-07-25,Ward-1,Paracetamol 500mg,other,Access,3,3
+Durga Patil,79,F,Bharath Math,+919420449171,Post-op hernia repair,wound_care,2026-07-26,Ward-1,Amoxiclav 625mg + Ibuprofen 400mg,antibiotic+other,Watch,14,2
+Veeresh Swamy,60,M,Bhagya Rao,+919904592121,Lower RTI on Azithromycin,antibiotic_course,2026-06-30,Ward-2,Amoxicillin 500mg,antibiotic,Watch,10,3
+Latha Gowdru,72,F,Mallikarjun Math,+919169713616,C-section wound care,wound_care,2026-07-06,Ward-2,Ibuprofen 400mg,other,Access,10,2
+Krishna Reddy,9,M,Vasantha Kumar,+919217362383,Typhoid on Ceftriaxone,antibiotic_course,2026-07-18,Ward-2,Doxycycline 100mg,antibiotic,Watch,7,2
+Prakash Kumar,69,M,Girija Menon,+919717554752,Viral gastroenteritis,fever_viral,2026-07-12,Ward-3,ORS packets,other,Access,10,4
+Ashok Kudachi,31,M,Sarojini Kumar,+919860839571,Post-op knee replacement,wound_care,2026-07-26,Ward-1,Cefuroxime 500mg,antibiotic,Watch,3,2
+Pushpa Kudachi,54,F,Eshwar Joshi,+919148846868,Burn wound management,wound_care,2026-07-25,Obstetrics,Amoxiclav 625mg,antibiotic,Watch,7,2
+Latha Iyer,72,F,Rahul Prasad,+919447810569,UTI on Ciprofloxacin,antibiotic_course,2026-07-22,Obstetrics,Cefixime 200mg,antibiotic,Watch,14,2
+Parvathamma Math,44,F,Kiran Reddy,+919995313101,Post-op mastectomy,wound_care,2026-06-18,ICU,Paracetamol 500mg,other,Access,10,3
+Fathima Devi,44,F,Pramod Murthy,+919596573456,Pharyngitis on Amoxicillin,antibiotic_course,2026-06-25,Ward-1,Amoxicillin 500mg,antibiotic,Watch,7,3
+Pramod Murthy,75,M,Gangamma Reddy,+919836042826,Diabetic foot ulcer,wound_care,2026-06-14,Ward-2,Ibuprofen 400mg,other,Access,7,2
+Rajesh Devi,23,M,Asha Math,+919713086866,Wound infection on Cefixime,antibiotic_course,2026-07-26,General-Surgery,Amoxicillin 500mg,antibiotic,Watch,7,3
+Savithramma Menon,65,F,Lingaraj Shetty,+919355166423,Abscess drainage,wound_care,2026-07-17,Ward-4,Amoxiclav 625mg + Paracetamol 500mg,antibiotic+other,Watch,5,3
+Sarojini Bhat,63,F,Thimmaiah Gowda,+919636929225,Diabetic foot ulcer,wound_care,2026-07-03,ICU,Metronidazole 400mg,antibiotic,Watch,7,3
+Durga Gowdru,68,F,Rajesh Math,+919826619655,Dengue convalescence,fever_viral,2026-07-19,Ward-1,Paracetamol 500mg,other,Access,14,3
+Sarojini Naik,15,F,Pramod Patil,+919658966058,Pneumonia on Levofloxacin,antibiotic_course,2026-07-15,Ward-1,Amoxicillin 500mg,antibiotic,Watch,5,3
+Kalpana Reddy,37,F,Prakash Iyer,+919671526798,Laceration repair,wound_care,2026-07-26,Obstetrics,Amoxiclav 625mg + Paracetamol 500mg,antibiotic+other,Watch,3,3
+Chetan Murthy,28,M,Yellamma Hegde,+919682535775,Diabetic foot ulcer,wound_care,2026-07-26,Orthopedics,Ibuprofen 400mg,other,Access,5,2
+Padmavathi Iyer,71,F,Eshwar Naik,+919576363024,Post-op appendectomy,wound_care,2026-06-19,ICU,Paracetamol 500mg,other,Access,3,3
+Prakash Desai,78,M,Sarojini Siddappa,+919736467148,Dental infection on Metronidazole,antibiotic_course,2026-07-22,General-Surgery,Amoxicillin 500mg,antibiotic,Watch,14,3
+Rathnamma Gowdru,18,F,Pramod Swamy,+919199767978,Hep A convalescence,fever_viral,2026-07-20,Ward-2,ORS packets,other,Access,5,4
+Durga Kumar,52,F,Anil Kulkarni,+919296873862,Skin infection on Clindamycin,antibiotic_course,2026-07-20,Cardiology,Azithromycin 500mg,antibiotic,Watch,7,1
+Rahul Bhat,46,M,Rathnamma Iyer,+919749012758,Typhoid on Ceftriaxone,antibiotic_course,2026-07-21,Ward-2,Azithromycin 500mg,antibiotic,Watch,3,1
+Geetha Murthy,77,F,Pramod Desai,+919543929865,Post-op knee replacement,wound_care,2026-07-25,Emergency,Cefuroxime 500mg,antibiotic,Watch,7,2
+Pushpa Math,57,F,Chetan Joshi,+919709038381,Typhoid on Ceftriaxone,antibiotic_course,2026-07-25,Ward-4,Azithromycin 500mg,antibiotic,Watch,14,1
+Arun Hegde,61,M,Deepa Kumar,+919449372065,Dental infection on Metronidazole,antibiotic_course,2026-07-23,Ward-3,Cefixime 200mg + Azithromycin 500mg,antibiotic+antibiotic,Watch,14,2

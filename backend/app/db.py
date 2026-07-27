@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import settings
@@ -53,6 +53,47 @@ def create_all() -> None:
     from app.health_fit import PatientHealthToken, PatientHealthData, PatientReport  # noqa
 
     Base.metadata.create_all(bind=engine)
+    _migrate_add_columns()
+
+
+def _migrate_add_columns() -> None:
+    """Add new columns to existing SQLite tables if missing."""
+    with engine.connect() as conn:
+        for table, column, typedef in [
+            ("users", "ward", "TEXT"),
+            ("enrollments", "created_by", "TEXT REFERENCES users(id)"),
+            ("followup_calls", "triggered_by", "TEXT REFERENCES users(id)"),
+            ("followup_calls", "account_name", "TEXT"),
+            ("telegram_sessions", "is_admin", "INTEGER NOT NULL DEFAULT 0"),
+            ("telegram_sessions", "auth_attempts", "INTEGER NOT NULL DEFAULT 0"),
+            ("patients", "abha_verified", "INTEGER NOT NULL DEFAULT 0"),
+            ("patients", "abha_verified_at", "TEXT"),
+        ]:
+            try:
+                conn.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN {column} {typedef}")
+                )
+                conn.commit()
+            except Exception:
+                pass  # column already exists
+
+
+def ensure_default_hospital() -> None:
+    """Backfill the hospitals table from HOSPITAL_CODE / HOSPITAL_NAME env
+    vars. Idempotent: re-runs are no-ops. Called from lifespan after
+    create_all so the table exists."""
+    from app.config import settings
+    from app.models import Hospital
+    s = SessionLocal()
+    try:
+        h = s.query(Hospital).filter(Hospital.code == settings.HOSPITAL_CODE).first()
+        if not h:
+            s.add(Hospital(code=settings.HOSPITAL_CODE,
+                           name=settings.HOSPITAL_NAME,
+                           active=1))
+            s.commit()
+    finally:
+        s.close()
 
 
 def get_db():

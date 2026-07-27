@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { api, ApiError } from "../api";
 import { C, LogLine } from "../components";
+import { t } from "../i18n";
 
 type Sheet = {
   hospital_name: string;
@@ -14,7 +15,7 @@ type Sheet = {
   bullets_kn: string[];
   sheet_source: string;
   schedule_days: number[];
-  meds: { name: string; aware: string | null; course_days: number | null; doses_per_day: number }[];
+  meds: { name: string; doses_per_day: number }[];
   telephones: string;
 };
 
@@ -35,9 +36,9 @@ export function Sheet() {
   return (
     <>
       <div style={{ padding: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }} className="no-print">
-        <span style={{ color: C.muted, fontSize: "0.75rem" }}>kannada caregiver sheet · {s.sheet_source}</span>
+        <span style={{ color: C.muted, fontSize: "0.75rem" }}>{t("kannada_sheet")} · {s.sheet_source}</span>
         <button onClick={() => window.print()} style={{ fontFamily: "inherit", background: "transparent", border: `1px solid ${C.border}`, color: C.secondary, borderRadius: 4, padding: "6px 10px" }}>
-          [ print ]
+          {t("print_btn")}
         </button>
       </div>
 
@@ -70,8 +71,6 @@ export function Sheet() {
             <tr style={{ borderBottom: "1px solid #000" }}>
               <th style={{ textAlign: "left", padding: 4 }}>ಔಷಧಿ</th>
               <th style={{ textAlign: "left", padding: 4 }}>ದಿನಕ್ಕೆ</th>
-              <th style={{ textAlign: "left", padding: 4 }}>ದಿನಗಳು</th>
-              <th style={{ textAlign: "left", padding: 4 }}>AWaRe</th>
             </tr>
           </thead>
           <tbody>
@@ -79,8 +78,6 @@ export function Sheet() {
               <tr key={i} style={{ borderBottom: "1px solid #ccc" }}>
                 <td style={{ padding: 4 }}>{m.name}</td>
                 <td style={{ padding: 4 }}>{m.doses_per_day}</td>
-                <td style={{ padding: 4 }}>{m.course_days ? `${m.course_days} ದಿನ` : "—"}</td>
-                <td style={{ padding: 4 }}>{m.aware || "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -94,7 +91,7 @@ export function Sheet() {
         <div style={{
           border: "2px solid #c00", marginTop: 16, padding: 10, fontWeight: 700,
         }}>
-          ⚠ ಈ ಲಕ್ಷಣಗಳು ಕಂಡರೆ ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ:
+          [!] ಈ ಲಕ್ಷಣಗಳು ಕಂಡರೆ ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ:
           <div style={{ fontWeight: 400, marginTop: 4 }}>
             ಹುಳು, ರಕ್ತಸ್ರಾವ, ಗಂಭೀರ ಜ್ವರ, ಉಸಿರಾಟದ ತೊಂದರೆ
           </div>
@@ -104,7 +101,7 @@ export function Sheet() {
         </div>
 
         <div style={{ marginTop: 20, fontSize: "0.7rem", color: "#444", borderTop: "1px solid #999", paddingTop: 8 }}>
-          consent: family consented to follow-up calls · triage layer — not an emergency service · Aarogya Bandhu
+          {t("sheet_footer")}
         </div>
       </div>
     </>

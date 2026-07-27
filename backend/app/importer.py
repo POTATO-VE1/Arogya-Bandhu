@@ -73,14 +73,6 @@ COLUMN_ALIASES: dict[str, list[str]] = {
         "type", "med_type", "medicine type", "medication type",
         "medicine_type", "medication_type", "antibiotic flag",
     ],
-    "aware_category": [
-        "aware", "aware category", "aware_category", "amr category",
-        "amr_category", "aware_class",
-    ],
-    "course_days": [
-        "course", "course_days", "course days", "days", "duration",
-        "course duration", "course_duration",
-    ],
     "doses_per_day": [
         "doses", "doses_per_day", "doses per day", "frequency",
         "daily doses", "daily_doses", "doses/day",
@@ -113,7 +105,6 @@ VALID_PROTOCOLS = {"wound_care", "antibiotic_course", "fever_viral"}
 VALID_SEX = {"m": "M", "f": "F", "male": "M", "female": "F", "o": "O", "other": "O",
              "ಪುರುಷ": "M", "ಮಹಿಳೆ": "F"}
 VALID_MED_TYPE = {"antibiotic": "antibiotic", "ab": "antibiotic", "other": "other"}
-VALID_AWARE = {"access": "Access", "watch": "Watch", "reserve": "Reserve"}
 
 
 # ── file parsing ──────────────────────────────────────────────────────────────
@@ -275,11 +266,6 @@ def _normalise_med_type(raw: str) -> str:
     return VALID_MED_TYPE.get(s, "other")
 
 
-def _normalise_aware(raw: str) -> str | None:
-    s = raw.lower().strip()
-    return VALID_AWARE.get(s)
-
-
 def _normalise_int(raw: str) -> int | None:
     m = re.search(r"(\d+)", raw)
     return int(m.group(1)) if m else None
@@ -365,8 +351,6 @@ def preview(
         ward = (mapped.get("ward") or "").strip() or None
         med_name = (mapped.get("med_name") or "").strip() or None
         med_type = _normalise_med_type(str(mapped.get("med_type", ""))) if mapped.get("med_type") else None
-        aware = _normalise_aware(str(mapped.get("aware_category", ""))) if mapped.get("aware_category") else None
-        course = _normalise_int(str(mapped.get("course_days", ""))) if mapped.get("course_days") else None
         doses = _normalise_int(str(mapped.get("doses_per_day", ""))) if mapped.get("doses_per_day") else None
 
         # validation
@@ -392,8 +376,6 @@ def preview(
         if med_name and not med_type:
             med_type = "other"
             warnings.append("medication type missing — defaulting to 'other'")
-        if med_name and not course:
-            warnings.append("course duration missing")
 
         # duplicate check
         if name and cg_phone:
@@ -415,8 +397,6 @@ def preview(
         if med_name:
             result_mapped["med_name"] = med_name
             result_mapped["med_type"] = med_type or "other"
-            result_mapped["aware_category"] = aware
-            result_mapped["course_days"] = course
             result_mapped["doses_per_day"] = doses or 3
 
         results.append(RowResult(
@@ -511,8 +491,6 @@ def execute_import(
                     enrollment_id=enrollment.id,
                     med_name=m["med_name"],
                     med_type=m.get("med_type", "other"),
-                    aware_category=m.get("aware_category"),
-                    course_days=m.get("course_days"),
                     doses_per_day=m.get("doses_per_day", 3),
                 )
                 db.add(med)
@@ -535,18 +513,18 @@ def generate_template(protocol_id: str = "wound_care") -> str:
     headers = [
         "Patient Name", "Age", "Sex", "Caregiver Name", "Caregiver Phone",
         "Condition", "Protocol", "Discharge Date", "Ward",
-        "Medication", "Med Type", "AWaRe Category", "Course Days", "Doses/Day",
+        "Medication", "Med Type", "Doses/Day",
     ]
     examples = {
         "wound_care": [
-            ["Lakshmamma", "62", "F", "Ramu", "+919876543210", "Post-op appendectomy", "wound_care", "2026-07-25", "Ward-4", "Amoxiclav 625mg", "antibiotic", "Watch", "5", "2"],
-            ["Ramesh", "38", "M", "Geeta", "+919876500001", "Circumcision post-op", "wound_care", "2026-07-24", "OPD", "Doxycycline 100mg", "antibiotic", "Access", "7", "2"],
+            ["Lakshmamma", "62", "F", "Ramu", "+919876543210", "Post-op appendectomy", "wound_care", "2026-07-25", "Ward-4", "Amoxiclav 625mg", "antibiotic", "2"],
+            ["Ramesh", "38", "M", "Geeta", "+919876500001", "Circumcision post-op", "wound_care", "2026-07-24", "OPD", "Doxycycline 100mg", "antibiotic", "2"],
         ],
         "antibiotic_course": [
-            ["Manjunath", "45", "M", "Sita", "+919876543210", "Lower RTI on azithromycin", "antibiotic_course", "2026-07-23", "Ward-2", "Azithromycin 500mg", "antibiotic", "Watch", "3", "1"],
+            ["Manjunath", "45", "M", "Sita", "+919876543210", "Lower RTI on azithromycin", "antibiotic_course", "2026-07-23", "Ward-2", "Azithromycin 500mg", "antibiotic", "1"],
         ],
         "fever_viral": [
-            ["Honnamma", "55", "F", "Mallik", "+919999999999", "Viral fever", "fever_viral", "2026-07-25", "OPD", "Paracetamol 500mg", "other", "", "5", "3"],
+            ["Honnamma", "55", "F", "Mallik", "+919999999999", "Viral fever", "fever_viral", "2026-07-25", "OPD", "Paracetamol 500mg", "other", "3"],
         ],
     }
     buf = io.StringIO()

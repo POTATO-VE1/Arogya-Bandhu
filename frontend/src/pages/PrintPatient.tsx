@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { api, ApiError } from "../api";
 import { C } from "../components";
+import { t } from "../i18n";
 
 type Enroll = {
   id: string;
@@ -10,7 +11,7 @@ type Enroll = {
   condition_label: string;
   ward: string | null;
   status: string;
-  meds: { name: string; type: string; aware: string | null; course_days: number | null; doses_per_day: number }[];
+  meds: { name: string; type: string; doses: number }[];
   calls: {
     id: string;
     day_index: number;
@@ -55,7 +56,7 @@ export function PrintPatient() {
   }, [p]);
 
   if (err) return <div style={{ padding: 40, fontFamily: "monospace" }}>{err}</div>;
-  if (!p) return <div style={{ padding: 40, fontFamily: "monospace" }}>loading…</div>;
+  if (!p) return <div style={{ padding: 40, fontFamily: "monospace" }}>{t("loading")}</div>;
 
   const en = p.enrollments[0];
   const sortedCalls = en ? [...en.calls].sort((a, b) => a.day_index - b.day_index) : [];
@@ -72,44 +73,43 @@ export function PrintPatient() {
 
       <div className="no-print" style={{ marginBottom: 16, borderBottom: `1px solid ${C.border}`, paddingBottom: 8 }}>
         <button onClick={() => window.print()} style={{ fontFamily: "inherit", padding: "6px 12px", cursor: "pointer", border: `1px solid ${C.border}`, borderRadius: 4, background: C.elevated, color: C.text }}>
-          [ print ]
+          {t("print_btn")}
         </button>
         <button onClick={() => window.close()} style={{ fontFamily: "inherit", padding: "6px 12px", cursor: "pointer", border: `1px solid ${C.border}`, borderRadius: 4, background: "transparent", color: C.muted, marginLeft: 8 }}>
-          [ close ]
+          {t("close_btn")}
         </button>
       </div>
 
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <h1 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0 }}>Post-Discharge Follow-Up Summary</h1>
-        <div style={{ color: C.muted, fontSize: "0.75rem" }}>Aarogya Bandhu · {new Date().toLocaleDateString()}</div>
+        <h1 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0 }}>{t("post_discharge_summary")}</h1>
+        <div style={{ color: C.muted, fontSize: "0.75rem" }}>{t("aarogya_bandhu")} · {new Date().toLocaleDateString()}</div>
       </div>
 
       {/* patient info */}
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 20 }}>
         <tbody>
-          <tr><Td label="Patient">{p.name}</Td><Td label="Age/Sex">{p.age ?? "?"} / {p.sex ?? "—"}</Td></tr>
-          <tr><Td label="Caregiver">{p.caregiver_name}</Td><Td label="Phone">{p.caregiver_phone}</Td></tr>
-          <tr><Td label="ABHA">{p.abha_number || "—"}</Td><Td label="Ward">{en?.ward || "—"}</Td></tr>
-          <tr><Td label="Condition">{en?.condition_label || "—"}</Td><Td label="Protocol">{en?.protocol_id || "—"}</Td></tr>
+          <tr><Td label={t("patient_label")}>{p.name}</Td><Td label={t("age_sex")}>{p.age ?? "?"} / {p.sex ?? "—"}</Td></tr>
+          <tr><Td label={t("caregiver_label")}>{p.caregiver_name}</Td><Td label={t("phone_label")}>{p.caregiver_phone}</Td></tr>
+          <tr><Td label={t("abha_label")}>{p.abha_number || "—"}</Td><Td label={t("ward_label")}>{en?.ward || "—"}</Td></tr>
+          <tr><Td label={t("condition_label_print")}>{en?.condition_label || "—"}</Td><Td label={t("protocol_label")}>{en?.protocol_id || "—"}</Td></tr>
         </tbody>
       </table>
 
       {/* medications */}
       {en && en.meds.length > 0 && (
         <>
-          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>Medications</h3>
+          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>{t("medications_heading")}</h3>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 20 }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-                <th style={thStyle}>Name</th><th style={thStyle}>Type</th><th style={thStyle}>AWaRe</th><th style={thStyle}>Course</th><th style={thStyle}>Doses/day</th>
+                <th style={thStyle}>{t("name")}</th><th style={thStyle}>{t("type")}</th><th style={thStyle}>{t("doses_day")}</th>
               </tr>
             </thead>
             <tbody>
               {en.meds.map((m, i) => (
                 <tr key={i} style={{ borderBottom: `1px solid ${C.borderMuted}` }}>
                   <td style={tdStyle}>{m.name}</td><td style={tdStyle}>{m.type}</td>
-                  <td style={tdStyle}>{m.aware || "—"}</td><td style={tdStyle}>{m.course_days ? `${m.course_days} days` : "—"}</td>
-                  <td style={tdStyle}>{m.doses_per_day}</td>
+                  <td style={tdStyle}>{m.doses}</td>
                 </tr>
               ))}
             </tbody>
@@ -120,17 +120,17 @@ export function PrintPatient() {
       {/* call history */}
       {sortedCalls.length > 0 && (
         <>
-          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>Follow-Up Call History</h3>
+          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>{t("followup_call_history")}</h3>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 20 }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-                <th style={thStyle}>Day</th><th style={thStyle}>Status</th><th style={thStyle}>Risk</th><th style={thStyle}>Date</th><th style={thStyle}>Provider</th>
+                <th style={thStyle}>{t("day_word")}</th><th style={thStyle}>{t("status_word")}</th><th style={thStyle}>{t("risk_word")}</th><th style={thStyle}>{t("date_word")}</th><th style={thStyle}>{t("provider_word")}</th>
               </tr>
             </thead>
             <tbody>
               {sortedCalls.map((c) => (
                 <tr key={c.id} style={{ borderBottom: `1px solid ${C.borderMuted}` }}>
-                  <td style={tdStyle}><strong>Day {c.day_index}</strong></td>
+                  <td style={tdStyle}><strong>{t("day_word")} {c.day_index}</strong></td>
                   <td style={tdStyle}>{c.status}</td>
                   <td style={tdStyle}>{c.risk || "—"}</td>
                   <td style={tdStyle}>{new Date(c.scheduled_at).toLocaleDateString()}</td>
@@ -145,7 +145,7 @@ export function PrintPatient() {
       {/* escalations */}
       {en && en.escalations.length > 0 && (
         <>
-          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>Escalations</h3>
+          <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: 8, borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>{t("escalations_word")}</h3>
           {en.escalations.map((e, i) => (
             <div key={i} style={{ marginBottom: 8, paddingLeft: 12, borderLeft: `2px solid ${e.level === "red" ? C.danger : C.warning}` }}>
               <strong>{e.level}</strong> · {e.status} · {new Date(e.created_at).toLocaleDateString()}
@@ -156,7 +156,7 @@ export function PrintPatient() {
       )}
 
       <div style={{ marginTop: 32, borderTop: `1px solid ${C.border}`, paddingTop: 12, fontSize: "0.6875rem", color: C.muted, textAlign: "center" }}>
-        Generated by Aarogya Bandhu · Post-Discharge Follow-Up System
+        {t("generated_footer")}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../api";
 import { Button, C, LogLine, Panel } from "../components";
+import { t } from "../i18n";
 
 type Esc = {
   id: string;
@@ -54,11 +55,11 @@ export function Escalations() {
 
   return (
     <div>
-      <h2 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: 16 }}>escalations</h2>
+      <h2 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: 16 }}>{t("escalations")}</h2>
       {err && <LogLine tone="danger">{err}</LogLine>}
-      <Panel title={`open · ${open.length}`} style={{ marginBottom: 16 }}>
+      <Panel title={`${t("open")} · ${open.length}`} style={{ marginBottom: 16 }}>
         {open.length === 0 ? (
-          <div style={{ color: C.muted }}>no escalations — all clear</div>
+          <div style={{ color: C.muted }}>{t("no_esc_all_clear")}</div>
         ) : (
           open.map((r) => (
             <div
@@ -78,23 +79,23 @@ export function Escalations() {
                 <strong>{r.patient_name}</strong> · {r.protocol_id} ·{" "}
                 <span style={{ color: C.secondary }}>{r.reasons.join(", ")}</span>
                 <div style={{ color: C.muted, fontSize: "0.75rem", marginTop: 2 }}>
-                  {new Date(r.created_at).toLocaleString()} · caregiver {r.caregiver_phone}
+                  {new Date(r.created_at).toLocaleString()} · {t("caregiver")} {r.caregiver_phone}
                 </div>
               </div>
               <Button variant="ghost" onClick={() => ack(r.id)}>
-                [ ack ]
+                {t("ack")}
               </Button>
             </div>
           ))
         )}
       </Panel>
-      <Panel title={`acked · ${done.length}`}>
+      <Panel title={`${t("acked")} · ${done.length}`}>
         {done.length === 0 ? (
           <div style={{ color: C.muted }}>—</div>
         ) : (
           done.map((r) => (
             <LogLine key={r.id} tone="secondary">
-              {new Date(r.created_at).toLocaleString()} {r.patient_name} · acked{" "}
+              {new Date(r.created_at).toLocaleString()} {r.patient_name} · {t("acked")}{" "}
               {r.acked_at ? `${Math.round((new Date(r.acked_at).getTime() - new Date(r.created_at).getTime()) / 60000)}m` : ""}
             </LogLine>
           ))

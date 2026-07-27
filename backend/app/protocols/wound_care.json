@@ -26,29 +26,20 @@
     "q_meds_today": {
       "type": "question", "clip": "q_meds_today", "retries": 1,
       "options": {
-        "1": { "score": 0, "next": "q_pillcount" },
-        "2": { "score": 2, "clip": "counsel_adherence", "reason": "doses missed today", "next": "q_pillcount" },
-        "3": { "score": 6, "clip": "counsel_adherence", "reason": "meds stopped", "next": "q_pillcount" }
+        "1": { "score": 0, "next": "closing" },
+        "2": { "score": 2, "clip": "counsel_yellow", "reason": "doses missed today", "next": "closing" },
+        "3": { "score": 6, "clip": "red_response", "reason": "meds stopped", "next": "@end_red" }
       }
     },
-    "q_pillcount": {
-      "type": "question", "clip": "q_pillcount", "retries": 1, "requires_antibiotic": true,
-      "options": {
-        "1": { "score": 0, "next": "edu_amr" },
-        "2": { "score": 1, "reason": "pills remain: 4-7", "next": "edu_amr" },
-        "3": { "score": 2, "reason": "pills remain: 8+", "next": "edu_amr" }
-      }
-    },
-    "edu_amr": { "type": "play", "clip": "edu_amr", "next": "closing" },
     "closing": { "type": "play", "clip": "closing", "next": "@end_ok" }
   },
   "sheet": {
     "bullets_kn": [
       "ಗಾಯವನ್ನು ಒಣಗಿಟ್ಟಿರಿ, ಸ್ವಚ್ಛವಾಗಿ ಇಟ್ಟಿರಿ.",
       "ಕೈ ತೊಳೆದು ನಂತರ ಮಾತ್ರ ಗಾಯದ ಬಳಿ ಕೈ ಹಾಕಿ.",
-      "ಔಷಧಿಯನ್ನು ಸಮಯಕ್ಕೆ, ಪೂರ್ತಿ ಕೋರ್ಸ್ ಮುಗಿಯುವವರೆಗೆ ಕೊಡಿ.",
+      "ಔಷಧಿಯನ್ನು ಸಮಯಕ್ಕೆ ಕೊಡಿ.",
       "ಹುಳು, ರಕ್ತಸ್ರಾವ, ಅಥವಾ ಜ್ವರ ಕಂಡರೆ ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ.",
-      "ಯಾಂಟಿಬಯಾಟಿಕ್ ಗೋಳಿಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಬೇಡಿ, ಮುಂದಕ್ಕೆ ಇಡಬೇಡಿ."
+      "ಜ್ವರ ಹೆಚ್ಚಾದರೆ ಅಥವಾ ಉಸಿರಾಟ ತೊಂದರೆಯಾದರೆ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ."
     ]
   }
 }

@@ -135,11 +135,20 @@ def fit_callback(
         "user_info": user_info,
     }
 
+    # T12 follow-up: notify the patient via Telegram that the link succeeded.
+    # Previously this was a silent dead-end — the user clicked the OAuth
+    # link, returned to Telegram, and got no confirmation.
+    try:
+        from app.telegram.bot import notify_google_fit_linked
+        notify_google_fit_linked(telegram_id)
+    except Exception as e:
+        log.warning("notify_google_fit_linked failed: %s", e)
+
     display_name = user_info.get("displayName", "your") if user_info else "your"
     return HTMLResponse(
         f"<html><body style='font-family:sans-serif;text-align:center;padding:50px;"
         f"background:#1a1a2e;color:#e0e0e0;'>"
-        f"<h1 style='color:#00ff88;'>✓ Google Fit Connected!</h1>"
+        f"<h1 style='color:#00ff88;'>[OK] Google Fit Connected!</h1>"
         f"<p>Authorized for {display_name} account.</p>"
         f"<p>Return to Telegram and send <b>/connect_device</b> to finish linking.</p>"
         f"<script>setTimeout(() => window.close(), 5000);</script>"

@@ -9,7 +9,7 @@ from apscheduler.triggers.date import DateTrigger
 from app.config import settings
 from app.db import SessionLocal
 from app.ivr.twilio_adapter import is_configured, place_call
-from app.models import FollowupCall
+from app.models import Enrollment, FollowupCall
 from app.tzutil import clamp_to_calling_window
 
 _scheduler: BackgroundScheduler | None = None
@@ -39,7 +39,7 @@ def _place_due_call(call_id: str) -> None:
         from app.routers.webhooks import _urls
         voice, gather, status = _urls(call_id)
         try:
-            sid = place_call(
+            sid, account_name = place_call(
                 call_id=call_id,
                 to_number=call.enrollment.patient.caregiver_phone,
                 voice_url=voice,
@@ -47,6 +47,7 @@ def _place_due_call(call_id: str) -> None:
             )
             call.provider = "twilio"
             call.provider_call_sid = sid
+            call.account_name = account_name  # for audit + debug
             call.status = "ringing"
             s.commit()
         except (PermissionError, RuntimeError):
@@ -107,3 +108,51 @@ def shutdown_scheduler() -> None:
     if _scheduler is not None:
         _scheduler.shutdown(wait=False)
         _scheduler = None
+
+
+# ── T12: pending-notifications retry job ─────────────────────────────────────
+def _retry_pending_notifications() -> None:
+    """Every 5 min: retry sends that previously failed. After 5 attempts,
+    mark `failed` and publish an SSE `notification:failed` event so the
+    dashboard can surface it."""
+    from datetime import datetime, timezone, timedelta
+    from app.models import PendingNotification
+    from app.events import publish as _publish_event
+    from app.notify import telegram_send
+
+    s = SessionLocal()
+    try:
+        now = datetime.now(timezone.utc)
+        rows = (s.query(PendingNotification)
+                .filter(PendingNotification.status == "pending",
+                        PendingNotification.next_retry_at <= now.isoformat())
+                .limit(20).all())
+        for row in rows:
+            ok = telegram_send(row.text)
+            row.attempt += 1
+            if ok:
+                row.status = "sent"
+                row.sent_at = now.isoformat()
+                row.last_error = None
+            elif row.attempt >= 5:
+                row.status = "failed"
+                row.last_error = "exhausted 5 attempts"
+                _publish_event("notification:failed", row.entity_id)
+            else:
+                # exponential backoff: 5m, 10m, 20m, 40m
+                backoff_min = 5 * (2 ** (row.attempt - 1))
+                row.next_retry_at = (now + timedelta(minutes=backoff_min)).isoformat()
+                row.last_error = "retry failed"
+        s.commit()
+    finally:
+        s.close()
+
+
+def ensure_retry_job() -> None:
+    """Register the 5-minute retry job once (idempotent)."""
+    sched = ensure_scheduler()
+    sched.add_job(
+        _retry_pending_notifications,
+        "interval", minutes=5, id="retry_pending_notifications",
+        replace_existing=True,
+    )

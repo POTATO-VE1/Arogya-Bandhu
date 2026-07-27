@@ -27,7 +27,7 @@ def _full_enroll(db, name="Lakshmamma", protocol="wound_care", verified=False) -
                    number_verified=1 if verified else 0)
     db.add(e); db.commit(); db.refresh(e)
     db.add(EnrollmentMed(enrollment_id=e.id, med_name="Amoxiclav", med_type="antibiotic",
-                         aware_category="Watch", course_days=5, doses_per_day=2))
+                         doses_per_day=2))
     db.commit()
     return e.id
 

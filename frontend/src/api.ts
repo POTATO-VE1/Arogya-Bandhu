@@ -13,7 +13,7 @@ export async function api<T = any>(
   path: string,
   opts: RequestInit = {},
 ): Promise<T> {
-  const isFormData = typeof Blob !== "undefined" && opts.body instanceof Blob;
+  const isFormData = typeof FormData !== "undefined" && opts.body instanceof FormData;
   const headers: Record<string, string> = {};
   if (!isFormData) {
     headers["Content-Type"] = "application/json";

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { nowHHMM } from "../api";
+import { api, nowHHMM } from "../api";
 import { C, KeyHint, LogLine, Panel } from "../components";
+import { t } from "../i18n";
 
 type Line = { ts: string; dir: "▸" | "◂"; text: string; tone?: "secondary" | "danger" | "success" | "warning" };
 type Expect = { node_id: string; options: { digit: string; reason?: string | null; clip?: string | null; next?: string | null }[] };
@@ -50,12 +51,43 @@ export function Demo() {
     wsRef.current?.send(JSON.stringify({ type: "digit", digit: d }));
   }
 
+  // T7: start another sim for the same patient after a call ends.
+  // We need the enrollment_id, which we don't have in the URL — the Board
+  // passes call_id but not enrollment_id. Read the enrollment from the call
+  // by fetching the patient detail (which exposes enrollments[0].id) or,
+  // simpler, store the enrollment_id we used in the URL query if provided.
+  const [rerunEid, setRerunEid] = useState<string | null>(null);
+  useEffect(() => {
+    // The Demo page can be opened with ?call=<id>&eid=<id> so rerun has the eid
+    // without an extra round trip.
+    const sp = new URLSearchParams(location.search);
+    setRerunEid(sp.get("eid"));
+  }, [location.search]);
+  async function runAnother() {
+    if (!rerunEid) {
+      // Fallback: parse the call_id and look it up via /api/patients/.../timeline
+      // is overkill; just navigate back to the board where the user can click [ sim ].
+      nav("/board");
+      return;
+    }
+    try {
+      const r = await api<{ call_id: string }>("/api/demo/trigger-call", {
+        method: "POST",
+        body: JSON.stringify({ enrollment_id: rerunEid, channel: "sim" }),
+      });
+      nav(`/demo?call=${r.call_id}&eid=${rerunEid}`);
+    } catch (ex: any) {
+      // best-effort fallback
+      nav("/board");
+    }
+  }
+
   if (!callId) {
     return (
-      <Panel title="demo call console">
-        <KeyHint>open a patient on the board and click [ sim ] to launch a simulated call.</KeyHint>
+      <Panel title={t("demo_console")}>
+        <KeyHint>{t("demo_hint")}</KeyHint>
         <div style={{ marginTop: 12 }}>
-          <button style={ghostBtn} onClick={() => nav("/board")}>[ ← board ]</button>
+          <button style={ghostBtn} onClick={() => nav("/board")}>{t("back_board")}</button>
         </div>
       </Panel>
     );
@@ -64,13 +96,13 @@ export function Demo() {
   return (
     <div>
       <h2 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: 4 }}>
-        demo call console <span className="cursor" />
+        {t("demo_console")} <span className="cursor" />
       </h2>
       <div style={{ color: C.warning, fontSize: "0.75rem", marginBottom: 16 }}>
-        ━ SIMULATED CALL — no real phone involved ━
+        {t("sim_call_banner")}
       </div>
 
-      <Panel title="transcript">
+      <Panel title={t("transcript")}>
         <div style={{ maxHeight: 320, overflowY: "auto" }}>
           {lines.length === 0 ? <div style={{ color: C.muted }}>…</div> :
             lines.map((l, i) => (
@@ -82,7 +114,7 @@ export function Demo() {
       </Panel>
 
       {expect && (
-        <Panel title={`current question · ${expect.node_id}`} style={{ marginTop: 16 }}>
+        <Panel title={`${t("current_question")} · ${expect.node_id}`} style={{ marginTop: 16 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
             {expect.options.map((o) => (
               <button
@@ -96,7 +128,7 @@ export function Demo() {
                 }}
               >
                 <span style={{ color: C.accent, fontWeight: 600 }}>[ {o.digit} ]</span>{" "}
-                {o.reason ? <span style={{ color: C.muted }}>{o.reason}</span> : <span>option {o.digit}</span>}
+                {o.reason ? <span style={{ color: C.muted }}>{o.reason}</span> : <span>{t("option")} {o.digit}</span>}
               </button>
             ))}
           </div>
@@ -104,27 +136,30 @@ export function Demo() {
       )}
 
       {ended && (
-        <Panel title="call result" style={{ marginTop: 16 }}>
+        <Panel title={t("call_result")} style={{ marginTop: 16 }}>
           {ended.risk && (
             <div style={{
               color: ended.risk === "red" ? C.danger : ended.risk === "yellow" ? C.warning : C.success,
               fontWeight: 600, fontSize: "1rem",
             }}>
-              risk: [{ended.risk?.toUpperCase()}] {ended.risk === "red" ? "→ escalation created" : ""}
+              {t("risk_prefix")} [{ended.risk?.toUpperCase()}] {ended.risk === "red" ? t("esc_created") : ""}
             </div>
           )}
           {ended.reasons && (
             <div style={{ color: C.muted, fontSize: "0.8125rem", marginTop: 4 }}>
-              reasons: {ended.reasons.join(", ")}
+              {t("reasons")} {ended.reasons.join(", ")}
             </div>
           )}
           <div style={{ marginTop: 12, display: "flex", gap: 12 }}>
-            <button style={ghostBtn} onClick={() => nav("/board")}>[ ← board ]</button>
+            <button style={ghostBtn} onClick={() => nav("/board")}>{t("back_board")}</button>
+            <button style={{ ...ghostBtn, borderColor: C.accent, color: C.accent }} onClick={runAnother}>
+              [ run another sim ]
+            </button>
           </div>
         </Panel>
       )}
 
-      <KeyHint>audio played via /audio · responses persist like a real Twilio call</KeyHint>
+      <KeyHint>{t("demo_audio_hint")}</KeyHint>
       <audio ref={audioRef} style={{ display: "none" }} />
     </div>
   );

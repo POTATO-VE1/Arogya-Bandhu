@@ -26,27 +26,17 @@
     "q_breath": {
       "type": "question", "clip": "q_breath", "retries": 1,
       "options": {
-        "1": { "score": 0, "next": "q_self_med" },
+        "1": { "score": 0, "next": "closing" },
         "2": { "score": 10, "clip": "red_response", "reason": "breathlessness", "next": "@end_red" }
       }
     },
-    "q_self_med": {
-      "type": "question", "clip": "q_self_med", "retries": 1,
-      "options": {
-        "1": { "score": 0, "next": "edu_viral" },
-        "2": { "score": 3, "clip": "counsel_selfmed", "reason": "self-medication reported", "next": "edu_viral" }
-      }
-    },
-    "edu_viral": { "type": "play", "clip": "edu_viral", "next": "closing" },
     "closing": { "type": "play", "clip": "closing", "next": "@end_ok" }
   },
   "sheet": {
     "bullets_kn": [
       "ಧಾರಾಳ ನೀರು ಕುಡಿಯಿರಿ, ವಿಶ್ರಾಂತಿ ತಗೊಳ್ಳಿ.",
-      "ಜ್ವರ ಬಂದಾಗ ಪ್ಯಾರಾಸಿಟಮಾಲ್ ತಗೊಳ್ಳಬಹುದು, ಆದರೆ ವೈದ್ಯರ ಸಲಹೆಯಿಲ್ಲದೆ ಯಾಂಟಿಬಯಾಟಿಕ್ ಬೇಡ.",
-      "ಶೀತ ಮತ್ತು ಸೋಂಕಿನ ಜ್ವರಕ್ಕೆ ಯಾಂಟಿಬಯಾಟಿಕ್ ಕೆಲಸ ಮಾಡುವುದಿಲ್ಲ.",
-      "ಉಸಿರಾಟ ತೊಂದರೆ ಅಥವಾ ಜ್ವರ ೩ ದಿನ ಮೀರಿದರೆ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ.",
-      "ಔಷಧಿ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ."
+      "ಜ್ವರ ಬಂದಾಗ ಪ್ಯಾರಾಸಿಟಮಾಲ್ ತಗೊಳ್ಳಬಹುದು, ಆದರೆ ವೈದ್ಯರ ಸಲಹೆಯಿಲ್ಲದೆ ಔಷಧಿ ತಗೊಳ್ಳಬೇಡಿ.",
+      "ಉಸಿರಾಟ ತೊಂದರೆ ಅಥವಾ ಜ್ವರ ೩ ದಿನ ಮೀರಿದರೆ ಆಸ್ಪತ್ರೆಗೆ ಬನ್ನಿ."
     ]
   }
 }

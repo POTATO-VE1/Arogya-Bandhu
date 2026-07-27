@@ -71,9 +71,6 @@ def build_bundle(patient: Patient, enrollment: Enrollment, meds: list[Enrollment
             "intent": "order",
             "medicationCodeableConcept": {"text": m.med_name},
         }
-        if m.course_days:
-            mr["dispenseRequest"] = {"expectedSupplyDuration": {"value": m.course_days,
-                                                                "unit": "d"}}
         med_reqs.append(mr)
 
     return {

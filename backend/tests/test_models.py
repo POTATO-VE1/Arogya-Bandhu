@@ -34,8 +34,7 @@ def test_roundtrip_one_row_per_table(db):
     db.add(e); db.commit(); db.refresh(e)
 
     m = EnrollmentMed(enrollment_id=e.id, med_name="Amoxiclav 625mg",
-                      med_type="antibiotic", aware_category="Watch",
-                      course_days=5, doses_per_day=2)
+                       med_type="antibiotic", doses_per_day=2)
     db.add(m); db.commit()
 
     c = FollowupCall(hospital_code="KA-DIST-01", enrollment_id=e.id,
@@ -61,7 +60,6 @@ def test_roundtrip_one_row_per_table(db):
     assert db.query(CallResponse).count() == 1
     assert db.query(Escalation).count() == 1
     assert db.query(AuditLog).count() == 1
-    assert db.query(EnrollmentMed).first().aware_category == "Watch"
 
 
 def test_schema_matches_docs(tmp_path):
@@ -78,6 +76,6 @@ def test_schema_matches_docs(tmp_path):
     # spot-check key columns that must exist exactly as spec'd (docs/02 §5)
     for col in [
         "number_verified", "risk_reasons", "provider_call_sid",
-        "aware_category", "course_days", "consent_at", "acked_by", "doses_per_day",
+        "consent_at", "acked_by", "doses_per_day",
     ]:
         assert col in text, f"column {col} missing from schema"
