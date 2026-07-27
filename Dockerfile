@@ -31,20 +31,22 @@ COPY backend/ ./backend/
 # so the absolute path inside the frontend stage is /build/backend/static.
 COPY --from=frontend /build/backend/static/ ./backend/static/
 
-# Persistent data dir. On Railway, mount a Volume at /app/backend/data
-# (Railway rejects the `VOLUME` Dockerfile directive — see their docs).
-RUN mkdir -p /app/backend/data && chown -R app:app /app
-USER app
+# Persistent data dir. On Render we mount a persistent disk here (see
+# render.yaml: disk.mountPath = /var/data). We deliberately do NOT switch
+# to a non-root user here because the persistent-disk mount point is
+# owned by root and the app user can't write to it. For a hackathon
+# demo this is fine; for production you'd run as non-root and adjust
+# the mount perms in start.sh.
+RUN mkdir -p /app/backend/data /var/data
 WORKDIR /app/backend
 
 ENV PORT=8000
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -fsS http://localhost:8000/api/healthz || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
+    CMD curl -fsS http://localhost:${PORT:-8000}/api/healthz || exit 1
 
-# Single worker — the in-process state (rate limiter, OTP store,
-# SSE subscribers, Twilio cooldown map) is single-process by design.
-CMD ["python", "-m", "uvicorn", "app.main:app", \
-     "--host", "0.0.0.0", "--port", "8000", "--workers", "1", \
-     "--proxy-headers", "--forwarded-allow-ips", "*"]
+# start.sh runs the demo seed (idempotent on warm starts, resets on cold
+# starts) then execs uvicorn. Single worker — in-process state is
+# single-process by design.
+CMD ["./start.sh"]

@@ -1,0 +1,55 @@
+# render.yaml — Render Blueprint for Aarogya Bandhu
+# Dashboard: https://dashboard.render.com/blueprints → "New Blueprint Instance"
+# Select this repo (POTATO-VE1/Arogya-Bandhu) and Render will create everything
+# in this file: one web service + one persistent disk for SQLite.
+#
+# After creation, set the secret env vars (SECRET_KEY, ADMIN_PASSWORD,
+# PUBLIC_BASE_URL) in the Render dashboard under the service's "Environment" tab.
+# Render auto-fills RENDER_EXTERNAL_URL, so you can use that for PUBLIC_BASE_URL
+# after the first deploy.
+
+services:
+  - type: web
+    name: aarogya-bandhu
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Render injects PORT (e.g. 10000) at runtime; the CMD honors ${PORT:-8000}.
+    healthCheckPath: /api/healthz
+    autoDeploy: true
+    disk:
+      name: aarogya-bandhu-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////var/data/app.db
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PRODUCTION
+        value: "true"
+      - key: HOSPITAL_CODE
+        value: KA-DIST-01
+      - key: HOSPITAL_NAME
+        value: District Hospital Demo
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: PUBLIC_BASE_URL
+        sync: false   # we set this manually after the first deploy
+        # Required by app/config.py.validate_production():
+      - key: SECRET_KEY
+        generateValue: true   # Render generates a strong random value
+      - key: ADMIN_PASSWORD
+        generateValue: true   # Render generates a strong random value
+      # Optional — leave empty for sim-only mode:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: CALL_ALLOWLIST
+        sync: false
