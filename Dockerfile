@@ -31,9 +31,9 @@ COPY backend/ ./backend/
 # so the absolute path inside the frontend stage is /build/backend/static.
 COPY --from=frontend /build/backend/static/ ./backend/static/
 
-# Persistent data dir (mounted as a Railway volume)
+# Persistent data dir. On Railway, mount a Volume at /app/backend/data
+# (Railway rejects the `VOLUME` Dockerfile directive — see their docs).
 RUN mkdir -p /app/backend/data && chown -R app:app /app
-VOLUME /app/backend/data
 USER app
 WORKDIR /app/backend
 
