@@ -55,6 +55,7 @@ from app.telegram.sessions import (
     check_rate_limit,
     format_time,
     get_patient_report_by_id,
+    get_patient_reports,
     get_session,
     lookup_patients_by_phone,
     reset_session,
@@ -242,6 +243,42 @@ def _send_alert_to_group(patient_data: dict, message: str, severity: str, esc_id
          chat_id=int(chat_id), text=text, disable_web_page_preview=True)
 
 
+def _send_alert_to_doctors(patient_data: dict, message: str, severity: str, esc_id: str) -> None:
+    """Send a direct Telegram DM to every doctor in the hospital who has
+    linked their Telegram account. Doctors can opt-in by messaging the
+    bot and using /link <username> after admin creates their account.
+    """
+    from app.models import User
+    s = SessionLocal()
+    try:
+        doctors = s.query(User).filter(
+            User.hospital_code == settings.HOSPITAL_CODE,
+            User.role == "doctor",
+            User.telegram_id.isnot(None),
+        ).all()
+        if not doctors:
+            return
+        icon = {"critical": "[CRIT]", "high": "[HIGH]", "medium": "[MED]"}.get(severity, "[INFO]")
+        text = (
+            f"{icon} Direct alert from your patient\n\n"
+            f"Patient: {patient_data['name']}\n"
+            f"Condition: {patient_data['condition']}\n"
+            f"Severity: {severity.upper()}\n"
+            f"Message: \"{message[:200]}\"\n\n"
+            f"Open the doctor's dashboard: {settings.PUBLIC_BASE_URL}/escalations\n"
+            f"Escalation ID: {esc_id[:8]}"
+        )
+        for d in doctors:
+            try:
+                _api(settings.TELEGRAM_BOT_TOKEN, "sendMessage",
+                     chat_id=int(d.telegram_id), text=text,
+                     disable_web_page_preview=True)
+            except Exception as e:
+                log.warning("doctor DM failed for %s: %s", d.username, e)
+    finally:
+        s.close()
+
+
 # ── main message handler ──────────────────────────────────────────────────────
 
 def _handle_message(token: str, msg: dict[str, Any]) -> None:
@@ -343,16 +380,16 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
                 _send(token, chat_id, (
                     f"ಆರೋಗ್ಯ ಬಂಧುಗೆ ಸ್ವಾಗತ, {first_name}! [+]\n\n"
                     "ನಿಮ್ಮ ವೈದ್ಯಕೀಯ ವರದಿ ಮತ್ತು ಔಷಧಿಗಳನ್ನು ಪಡೆಯಲು, ದಯವಿಟ್ಟು ನಿಮ್ಮ ನೋಂದಾಯಿತ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ:\n"
-                    "ಉದಾಹರಣೆಗೆ: +919353808767"
+                    "ಉದಾಹರಣೆಗೆ: +91XXXXXXXXXX"
                 ))
             else:
                 _send(token, chat_id, (
                     f"Welcome to Aarogya Bandhu, {first_name}! [+]\n\n"
-                    "To load your medical report and prescriptions, please enter your registered phone number:\n"
-                    "Example: +919353808767"
+                    "To load your medical report and prescriptions, please enter your "
+                    "registered phone number:\n"
+                    "Example: +91XXXXXXXXXX"
                 ))
             return
-
         if cmd == "/help":
             if lang == "kn":
                 _send(token, chat_id, (
@@ -413,10 +450,110 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
                 f"[#] Patient Summary:\n"
                 f"Name: {patient['name']} ({patient['age']}y/{patient['sex']})\n"
                 f"Condition: {patient['condition']}\n"
+                f"Protocol: {patient['protocol']}\n"
                 f"Ward: {patient['ward']}\n"
-                f"Meds: {patient['meds']}\n"
-                f"Diet Info: {session.diet_info or 'Not recorded'}"
+                f"Discharge: {patient['discharge_date']}\n"
+                f"\n[R] Prescribed: {patient['meds']}\n"
+                f"[=] Diet: {session.diet_info or 'Not recorded'}\n"
+                f"[+] Medication: {session.medication_info or 'Not recorded'}\n"
+                f"[?] Feeling: {session.feeling_info or 'Not recorded'}"
             ))
+            return
+
+        if cmd == "/medication":
+            if not session.verified:
+                _send(token, chat_id, "Please verify your phone number first.")
+                return
+            session.current_step = "collecting_medication"
+            save_session(session)
+            if lang == "kn":
+                _send(token, chat_id, ("[+] ನಿಮ್ಮ ಔಷಧಿ ಸೇವನೆಯ ಮಾಹಿತಿಯನ್ನು "
+                                       "ತಿಳಿಸಿ (ಉದಾ: 'ಮಧ್ಯಾಹ್ನ ಒಂದು, ರಾತ್ರಿ ಒಂದు'):"))
+            else:
+                _send(token, chat_id, ("[+] Share your medication consumption "
+                                       "(e.g., 'one at noon, one at night'):"))
+            return
+
+        if cmd == "/feeling":
+            if not session.verified:
+                _send(token, chat_id, "Please verify your phone number first.")
+                return
+            session.current_step = "collecting_feeling"
+            save_session(session)
+            if lang == "kn":
+                _send(token, chat_id, ("[?] ನಿಮ್ಮ ಆರೋಗ್ಯ ಸ್ಥಿತಿ ಹೇಗಿದೆ ಎಂದು ತಿಳಿಸಿ "
+                                       "(ಉದಾ: 'ಉತ್ತಮ', 'ಸ್ವಲ್ಪ ನೋವು'):"))
+            else:
+                _send(token, chat_id, ("[?] How are you feeling today? "
+                                       "(e.g., 'better', 'some pain', 'fever'):"))
+            return
+
+        if cmd == "/reports":
+            if not session.verified or not session.patient_id:
+                _send(token, chat_id, "Please verify your phone number first.")
+                return
+            reports = get_patient_reports(session.patient_id)
+            if not reports:
+                if lang == "kn":
+                    _send(token, chat_id, "[R] ನಿಮ್ಮ ಯಾವುದೇ ವೈದ್ಯಕೀಯ ವರದಿಗಳು ಇನ್ನೂ ಅಪ್‌ಲೋಡ್ ಆಗಿಲ್ಲ.")
+                else:
+                    _send(token, chat_id, "[R] No medical reports uploaded yet.")
+                return
+            # Telegram message limit is 4096 chars; show top 10 most recent.
+            lines = ["[R] Your Medical Reports (most recent first):\n"]
+            type_labels = {
+                "lab_report": "Lab Report",
+                "discharge_summary": "Discharge Summary",
+                "prescription": "Prescription",
+                "other": "Other",
+            }
+            for idx, r in enumerate(reports[:10], 1):
+                t = type_labels.get(r["report_type"], r["report_type"])
+                # Trim the timestamp to a date.
+                when = r["uploaded_at"][:10] if r["uploaded_at"] else "—"
+                lines.append(f"{idx}. [{t}] {r['filename']} — {when}")
+            if len(reports) > 10:
+                lines.append(f"\n… and {len(reports) - 10} more. Ask your nurse for full access.")
+            lines.append(
+                f"\nFull records: {settings.PUBLIC_BASE_URL}/staff/patient-reports"
+                if settings.PUBLIC_BASE_URL else ""
+            )
+            _send(token, chat_id, "\n".join(lines))
+            return
+
+        if cmd.startswith("/link"):
+            # /link <username> — bind this Telegram to a doctor/nurse account
+            # so they get direct DM alerts for severe patients.
+            from app.models import User
+            parts = text.split(maxsplit=1)
+            if len(parts) < 2:
+                _send(token, chat_id, (
+                    "Usage: /link <username>\n"
+                    "Example: /link dr.priya\n"
+                    "Your Telegram account will receive direct alerts for severe patients."
+                ))
+                return
+            username = parts[1].strip().lstrip("@").lower()
+            s = SessionLocal()
+            try:
+                u = s.query(User).filter(
+                    User.username == username,
+                    User.hospital_code == settings.HOSPITAL_CODE,
+                ).first()
+                if not u:
+                    _send(token, chat_id, f"[X] User '@{username}' not found. Ask your admin to create the account first.")
+                    return
+                if u.telegram_id and u.telegram_id != telegram_id:
+                    _send(token, chat_id, "[X] This account is already linked to a different Telegram. Ask admin to unlink.")
+                    return
+                u.telegram_id = telegram_id
+                s.commit()
+                _send(token, chat_id, (
+                    f"[OK] Telegram linked to @{u.username} ({u.role}, {u.display_name}).\n\n"
+                    f"You will now receive direct alerts for severe patients."
+                ))
+            finally:
+                s.close()
             return
 
         if cmd == "/connect_device":
@@ -539,18 +676,61 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
     # Step: collecting diet
     if session.current_step == "collecting_diet":
         session.diet_info = text.strip()
-        session.current_step = "active"
+        session.current_step = "collecting_medication"
         save_session(session)
 
         if lang == "kn":
             _send(token, chat_id, (
                 "[OK] ಆಹಾರದ ವಿವರಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ! [=]\n\n"
-                "ನಿಮ್ಮ ಚೇತರಿಕೆ, ಔಷಧಿ ಮತ್ತು ದಿನನಿತ್ಯದ ಸಲಹೆಗಳನ್ನು ಈಗ ಕೇಳಬಹುದು."
+                "[+] ಔಷಧಿ ಸೇವನೆ: ನಿಮ್ಮ ನೇಮಕ್ಕಾದ ಔಷಧಿಗಳನ್ನು ಎಷ್ಟು ಬಾರಿ / ಯಾವಾಗ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿದ್ದೀರಿ?\n"
+                "ಉದಾ: 'ಮಧ್ಯಾಹ್ನ 12 ಗಂಟೆಗೆ ಒಂದು ಆ್ಯಂಟಿಬಯೋಟಿಕ್, ರಾತ್ರಿ 9 ಗಂಟೆಗೆ ಒಂದು'"
             ))
         else:
             _send(token, chat_id, (
                 "[OK] Diet info saved! [=]\n\n"
-                "Setup is complete. Feel free to ask any question about your recovery or medications."
+                "[+] Medication consumption: How often / when are you taking your "
+                "prescribed medicines?\n"
+                "Example: 'One antibiotic at 12pm, one at 9pm'"
+            ))
+        return
+
+    # Step: collecting medication
+    if session.current_step == "collecting_medication":
+        session.medication_info = text.strip()
+        session.current_step = "collecting_feeling"
+        save_session(session)
+
+        if lang == "kn":
+            _send(token, chat_id, (
+                "[OK] ಔಷಧಿ ಮಾಹಿತಿ ಉಳಿಸಲಾಗಿದೆ! [+]\n\n"
+                "[?] ನಿಮ್ಮ ಆರೋಗ್ಯ ಸ್ಥಿತಿ ಹೇಗಿದೆ?\n"
+                "ಉದಾ: 'ಉತ್ತಮ ಚೇತರಿಕೆ', 'ಸ್ವಲ್ಪ ನೋವು', 'ಜ್ವರ ಕಡಿಮೆಯಾಗಿದೆ'"
+            ))
+        else:
+            _send(token, chat_id, (
+                "[OK] Medication info saved! [+]\n\n"
+                "[?] How are you feeling today?\n"
+                "Example: 'Recovering well', 'Some pain', 'Fever has reduced'"
+            ))
+        return
+
+    # Step: collecting feeling
+    if session.current_step == "collecting_feeling":
+        session.feeling_info = text.strip()
+        session.current_step = "active"
+        save_session(session)
+
+        if lang == "kn":
+            _send(token, chat_id, (
+                "[OK] ಆರೋಗ್ಯ ವಿವರ ಉಳಿಸಲಾಗಿದೆ! [?]\n\n"
+                "ನಿಮ್ಮ ಚೇತರಿಕೆ, ಔಷಧಿ ಮತ್ತು ದಿನನಿತ್ಯದ ಸಲಹೆಗಳನ್ನು ಈಗ ಕೇಳಬಹುದು.\n"
+                "ತುರ್ತು ಸಹಾಯಕ್ಕಾಗಿ ನೇರವಾಗಿ 'sos' ಎಂದು ಟೈಪ್ ಮಾಡಿ."
+            ))
+        else:
+            _send(token, chat_id, (
+                "[OK] Feeling info saved! [?]\n\n"
+                "Setup is complete. Feel free to ask any question about your recovery or medications.\n"
+                "For emergencies, type 'sos' anytime."
             ))
         return
 
@@ -572,6 +752,7 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
             esc_id = _create_alert(patient_ctx, text, "critical")
             if esc_id:
                 _send_alert_to_group(patient_ctx, text, "critical", esc_id)
+                _send_alert_to_doctors(patient_ctx, text, "critical", esc_id)
                 if lang == "kn":
                     _send(token, chat_id, (
                         "[!] SOS ಸ್ವೀಕರಿಸಲಾಗಿದೆ — ನಿಮ್ಮ ತುರ್ತು ಸಹಾಯ ವಿನಂತಿಯನ್ನು ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ತಕ್ಷಣ ರವಾನಿಸಲಾಗಿದೆ.\n"
@@ -589,6 +770,7 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
             esc_id = _create_alert(patient_ctx, text, severity)
             if esc_id:
                 _send_alert_to_group(patient_ctx, text, severity, esc_id)
+                _send_alert_to_doctors(patient_ctx, text, severity, esc_id)
                 if lang == "kn":
                     _send(token, chat_id, (
                         f"[!] ನಿಮ್ಮ ಲಕ್ಷಣವನ್ನು ({severity.upper()}) ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ವರದಿ ಮಾಡಲಾಗಿದೆ.\n"

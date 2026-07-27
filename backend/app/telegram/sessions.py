@@ -30,6 +30,8 @@ class Session:
     admin: bool = False           # verified admin via contact share
     preferred_lang: str = "en"
     diet_info: str | None = None
+    medication_info: str | None = None
+    feeling_info: str | None = None
     google_fit_consent: bool = False
     current_step: str | None = None
     # auth-failure counter (imperative flow). Persisted in DB so
@@ -91,6 +93,8 @@ def get_session(telegram_id: int) -> Session:
                 admin=bool(getattr(ts, "is_admin", 0) or 0),
                 preferred_lang=ts.preferred_lang or "en",
                 diet_info=ts.diet_info,
+                medication_info=getattr(ts, "medication_info", None),
+                feeling_info=getattr(ts, "feeling_info", None),
                 google_fit_consent=bool(ts.google_fit_consent),
                 current_step=ts.current_step,
                 auth_attempts=getattr(ts, "auth_attempts", 0) or 0,
@@ -143,6 +147,8 @@ def save_session(session: Session) -> None:
         ts.auth_attempts = session.auth_attempts
         ts.preferred_lang = session.preferred_lang
         ts.diet_info = session.diet_info
+        ts.medication_info = session.medication_info
+        ts.feeling_info = session.feeling_info
         ts.google_fit_consent = 1 if session.google_fit_consent else 0
         ts.current_step = session.current_step
         ts.updated_at = now_utc()
@@ -165,35 +171,54 @@ def reset_session(session: Session) -> None:
     session.admin = False
     session.auth_attempts = 0
     session.diet_info = None
+    session.medication_info = None
+    session.feeling_info = None
     session.google_fit_consent = False
     session.current_step = "awaiting_phone"
     session.preferred_lang = "en"
     save_session(session)
 
 
+# Protocols the Aarogya Bandhu team considers "severe enough" to warrant
+# ongoing Telegram-based follow-up. Patients enrolled under OTHER protocols
+# (or with no enrollment at all) cannot use the bot — the spec says
+# "report analytics and bot interaction is only for severe cases".
+SEVERE_PROTOCOLS = {"wound_care", "antibiotic_course", "post_surgical"}
+
+
 def lookup_patients_by_phone(phone: str) -> list[dict]:
-    """Find all patient records sharing the given caregiver phone number."""
+    """Find all SEVERE-CASE patient records sharing the caregiver phone.
+
+    Only patients with an ACTIVE enrollment under a SEVERE protocol
+    (wound_care, antibiotic_course, post_surgical) are returned. Minor
+    cases (fever, cough, routine discharge) are not eligible.
+    """
     s = SessionLocal()
     try:
         patients = s.query(Patient).filter(Patient.caregiver_phone == phone).all()
         results = []
         for p in patients:
-            en = s.query(Enrollment).filter(Enrollment.patient_id == p.id).first()
+            en = s.query(Enrollment).filter(
+                Enrollment.patient_id == p.id,
+                Enrollment.status == "active",
+                Enrollment.protocol_id.in_(SEVERE_PROTOCOLS),
+            ).first()
+            if not en:
+                continue
             meds = []
-            if en:
-                for m in s.query(EnrollmentMed).filter(
-                        EnrollmentMed.enrollment_id == en.id).all():
-                    meds.append(f"{m.med_name} ({m.doses_per_day}x/day)")
+            for m in s.query(EnrollmentMed).filter(
+                    EnrollmentMed.enrollment_id == en.id).all():
+                meds.append(f"{m.med_name} ({m.doses_per_day}x/day)")
             results.append({
                 "patient_id": p.id,
                 "name": p.name,
                 "age": p.age,
                 "sex": p.sex,
                 "phone": p.caregiver_phone,
-                "condition": en.condition_label if en else "General Recovery",
-                "protocol": en.protocol_id if en else "General",
-                "ward": en.ward if en else "General",
-                "discharge_date": en.discharge_date if en else "N/A",
+                "condition": en.condition_label,
+                "protocol": en.protocol_id,
+                "ward": en.ward or "General",
+                "discharge_date": en.discharge_date,
                 "meds": ", ".join(meds) if meds else "None prescribed",
             })
         return results
@@ -226,6 +251,32 @@ def get_patient_report_by_id(patient_id: str) -> dict | None:
             "discharge_date": en.discharge_date if en else "N/A",
             "meds": ", ".join(meds) if meds else "None prescribed",
         }
+    finally:
+        s.close()
+
+
+def get_patient_reports(patient_id: str) -> list[dict]:
+    """Fetch uploaded medical reports (lab reports, discharge summaries, etc)
+    for a patient, ordered most-recent first. Returns empty list if none."""
+    from app.health_fit import PatientReport
+    s = SessionLocal()
+    try:
+        rows = (
+            s.query(PatientReport)
+            .filter(PatientReport.patient_id == patient_id)
+            .order_by(PatientReport.uploaded_at.desc())
+            .all()
+        )
+        return [
+            {
+                "id": r.id,
+                "filename": r.filename,
+                "report_type": r.report_type,
+                "uploaded_at": r.uploaded_at,
+                "uploaded_by": r.uploaded_by,
+            }
+            for r in rows
+        ]
     finally:
         s.close()
 

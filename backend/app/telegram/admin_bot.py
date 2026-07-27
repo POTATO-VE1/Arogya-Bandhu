@@ -113,6 +113,7 @@ VALID_ROLES = {
         "fields": [
             ("display_name", "Nurse's full name (e.g. Nurse Kavitha)"),
             ("ward", "Ward assignment (e.g. Ward-4, ICU, Emergency)"),
+            ("supervisor", "Supervisor username (e.g. dr.priya) — required for reporting hierarchy"),
         ],
     },
     "staff": {
@@ -120,10 +121,27 @@ VALID_ROLES = {
         "fields": [
             ("display_name", "Full name"),
             ("department", "Department or ward"),
-            ("supervisor", "Supervisor name (optional, press skip if none)"),
+            ("supervisor", "Supervisor username (e.g. dr.priya or nurse.kavitha) — required for reporting hierarchy"),
         ],
     },
 }
+
+
+def _validate_supervisor(s, username: str) -> tuple[bool, str]:
+    """Return (ok, message). Supervisor must exist and be a doctor or nurse
+    in the same hospital. Prevents creating orphan staff with no reporting line.
+    """
+    if not username:
+        return False, "[X] Supervisor is required. Enter a valid username (e.g., dr.priya)."
+    u = s.query(User).filter(
+        User.username == username,
+        User.hospital_code == settings.HOSPITAL_CODE,
+    ).first()
+    if not u:
+        return False, f"[X] Supervisor '@{username}' not found. Create them first or use an existing doctor's username."
+    if u.role not in ("doctor", "nurse", "admin"):
+        return False, f"[X] Supervisor '@{username}' is a {u.role}, not a doctor/nurse. Choose a doctor or nurse."
+    return True, f"supervisor {u.display_name} ({u.role})"
 
 
 def _cleanup(telegram_id: int) -> None:
@@ -187,17 +205,25 @@ def handle_admin_message(token: str, telegram_id: int, chat_id: int, text: str) 
         try:
             users = s.query(User).filter(
                 User.hospital_code == settings.HOSPITAL_CODE,
-            ).order_by(User.created_at.desc()).all()
+            ).order_by(User.role, User.created_at).all()
             if not users:
                 _send_fn(token, chat_id, "No staff accounts found.")
                 return True
-            lines = ["[+] Staff Accounts:\n"]
+            # Build reporting structure: doctors first, then their reports.
+            doctors = [u for u in users if u.role == "doctor"]
+            nurses = [u for u in users if u.role == "nurse"]
+            staff = [u for u in users if u.role == "staff"]
+            admins = [u for u in users if u.role == "admin"]
             role_icons = {"admin": "[A]", "doctor": "[D]", "nurse": "[N]", "staff": "[S]"}
-            for u in users:
-                icon = role_icons.get(u.role, "[?]")
-                ward_info = f" [{u.ward}]" if u.ward else ""
-                lines.append(f"{icon} {u.display_name} (@{u.username}) — {u.role.upper()}{ward_info}")
-            lines.append(f"\nTotal: {len(users)}")
+            lines = ["[+] Staff Accounts (reporting hierarchy):\n"]
+            for group in (admins, doctors, nurses, staff):
+                for u in group:
+                    icon = role_icons.get(u.role, "[?]")
+                    ward = f" [{u.ward}]" if u.ward else ""
+                    sup = f" → @{u.supervisor}" if u.supervisor else ""
+                    tg = f" [TG:{u.telegram_id}]" if u.telegram_id else " [TG:unlinked]"
+                    lines.append(f"{icon} {u.display_name} (@{u.username}) — {u.role.upper()}{ward}{sup}{tg}")
+            lines.append(f"\nTotal: {len(users)} (doctors: {len(doctors)}, nurses: {len(nurses)}, staff: {len(staff)}, admins: {len(admins)})")
             _send_fn(token, chat_id, "\n".join(lines))
         finally:
             s.close()
@@ -305,8 +331,19 @@ def _handle_conversation(
         role_info = VALID_ROLES[data["role"]]
         idx = state.get("field_index", 0)
 
-        if text.strip().lower() in ("skip", "-", "") and field_name == "supervisor":
-            data[field_name] = None
+        if field_name == "supervisor":
+            # Supervisor is REQUIRED for nurse/staff, must reference an
+            # existing doctor/nurse in the same hospital.
+            value = text.strip().lstrip("@").lower()
+            s = SessionLocal()
+            try:
+                ok, msg = _validate_supervisor(s, value)
+            finally:
+                s.close()
+            if not ok:
+                _send_fn(token, chat_id, msg + "\n\nTry again with a valid doctor/nurse username:")
+                return True
+            data[field_name] = value
         else:
             if not text.strip() or text.strip().lower() in ("skip", "-"):
                 _send_fn(token, chat_id, "This field is required. Please enter a value:")
@@ -358,6 +395,7 @@ def _handle_conversation(
                 password_hash=hash_password(data["password"]),
                 role=data["role"],
                 ward=data.get("ward") or data.get("department"),
+                supervisor=data.get("supervisor"),
                 created_at=now_utc(),
             )
             s.add(new_user)

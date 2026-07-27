@@ -40,6 +40,8 @@ class User(Base):
     display_name: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[str] = mapped_column(Text, nullable=False, default="staff")
     ward: Mapped[str | None] = mapped_column(Text, nullable=True)  # ward assignment for nurse/staff
+    telegram_id: Mapped[int | None] = mapped_column(Integer, nullable=True)  # for direct DM alerts
+    supervisor: Mapped[str | None] = mapped_column(Text, nullable=True)  # supervisor username
     created_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
 
 
@@ -209,6 +211,8 @@ class TelegramSession(Base):
     auth_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     preferred_lang: Mapped[str] = mapped_column(Text, nullable=False, default="en")
     diet_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    medication_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    feeling_info: Mapped[str | None] = mapped_column(Text, nullable=True)
     google_fit_consent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     current_step: Mapped[str | None] = mapped_column(Text, nullable=True)
     updated_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)

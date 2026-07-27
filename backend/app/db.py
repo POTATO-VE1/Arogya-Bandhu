@@ -61,9 +61,14 @@ def _migrate_add_columns() -> None:
     with engine.connect() as conn:
         for table, column, typedef in [
             ("users", "ward", "TEXT"),
+            ("users", "telegram_id", "INTEGER"),
+            ("users", "supervisor", "TEXT"),
             ("enrollments", "created_by", "TEXT REFERENCES users(id)"),
             ("followup_calls", "triggered_by", "TEXT REFERENCES users(id)"),
             ("followup_calls", "account_name", "TEXT"),
+            ("telegram_sessions", "diet_info", "TEXT"),
+            ("telegram_sessions", "medication_info", "TEXT"),
+            ("telegram_sessions", "feeling_info", "TEXT"),
             ("telegram_sessions", "is_admin", "INTEGER NOT NULL DEFAULT 0"),
             ("telegram_sessions", "auth_attempts", "INTEGER NOT NULL DEFAULT 0"),
             ("patients", "abha_verified", "INTEGER NOT NULL DEFAULT 0"),
