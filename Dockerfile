@@ -8,7 +8,9 @@ COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm ci --prefer-offline 2>/dev/null || npm install
 COPY frontend/ ./
 RUN npm run build
-# The built assets land in /build/frontend/dist
+# Vite outputs to ../backend/static relative to WORKDIR, which resolves
+# to /build/backend/static in the build context. (The comment in
+# frontend/vite.config.ts: build.outDir = "../backend/static".)
 
 # ── Stage 2: Python runtime ──
 FROM python:3.12-slim
@@ -24,8 +26,10 @@ COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./backend/
-# Copy the built frontend into the static dir FastAPI serves
-COPY --from=frontend /build/frontend/dist/ ./backend/static/
+# Copy the built frontend into the static dir FastAPI serves.
+# Vite wrote to ../backend/static (relative to WORKDIR /build/frontend),
+# so the absolute path inside the frontend stage is /build/backend/static.
+COPY --from=frontend /build/backend/static/ ./backend/static/
 
 # Persistent data dir (mounted as a Railway volume)
 RUN mkdir -p /app/backend/data && chown -R app:app /app
