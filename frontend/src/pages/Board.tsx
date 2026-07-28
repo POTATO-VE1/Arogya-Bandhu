@@ -5,6 +5,7 @@ import { api, ApiError, nowHHMM } from "../api";
 import { Button, C, LogLine, Panel, RiskBadge, Stat } from "../components";
 import { t } from "../i18n";
 import { useToast } from "../App";
+import { TwilioHealth } from "../TwilioHealth";
 
 type ProtoOpt = { reason: string; score: number };
 type ProtoQuestion = { clip: string; options: Record<string, ProtoOpt> };
@@ -111,6 +112,8 @@ export function Board() {
   const [resolveDisposition, setResolveDisposition] = useState("called_family");
   const [resolveCallbackHrs, setResolveCallbackHrs] = useState<string>("");
   const [whatNow, setWhatNow] = useState<WhatNow | null>(null);
+  const [scriptedBusy, setScriptedBusy] = useState(false);
+  const [scriptedResult, setScriptedResult] = useState<any | null>(null);
 
   async function refresh() {
     try {
@@ -201,6 +204,21 @@ export function Board() {
     } catch (ex) { setErr(ex instanceof ApiError ? ex.message : "trigger failed"); }
   }
 
+  async function runScriptedRed() {
+    setScriptedBusy(true);
+    setScriptedResult(null);
+    try {
+      const r = await api<any>("/api/demo/scripted-red", { method: "POST" });
+      setScriptedResult(r);
+      // Refresh the page data so the new escalation + call show up
+      setTick(t => t + 1);
+    } catch (ex) {
+      setScriptedResult({ error: ex instanceof ApiError ? ex.message : "failed" });
+    } finally {
+      setScriptedBusy(false);
+    }
+  }
+
   async function resolveEscalation() {
     if (!resolveTarget) return;
     const body: any = {
@@ -284,6 +302,9 @@ export function Board() {
   return (
     <div>
       <h2 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: 16 }}>{t("board")} · today</h2>
+
+      {/* ── Twilio Account Health (visible to admin) ── */}
+      <TwilioHealth pollMs={6000} />
 
       {/* ── WhatNow panel (T6) ── */}
       {whatNow && (whatNow.next_calls_due_2h.length > 0 ||
@@ -509,6 +530,14 @@ export function Board() {
 
       {/* ── Action bar ── */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
+        <button
+          style={{ ...btnGhost, borderColor: C.danger, color: C.danger, fontWeight: 600 }}
+          onClick={runScriptedRed}
+          disabled={scriptedBusy}
+          title="Drive a fresh sim call all the way to RED with one click — chest pain, symptoms got worse, red escalation, callback scheduled"
+        >
+          {scriptedBusy ? "[ running… ]" : "[ ! ] demo red scenario"}
+        </button>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
           <button style={{ ...btnGhost, borderColor: C.success, color: C.success }} onClick={exportCSV}>[ {t("export_csv")} ]</button>
           <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) { setImportFile(f); setImportPreview(null); setImportMsg(null); } }} />
@@ -521,6 +550,47 @@ export function Board() {
       </div>
 
       {importMsg && <div style={{ marginBottom: 12, fontSize: "0.8125rem", color: importMsg.startsWith("imported") ? C.success : C.muted }}>{importMsg}</div>}
+
+      {scriptedResult && (
+        <Panel
+          title={scriptedResult.error ? "demo red scenario · FAILED" : `demo red scenario · risk=${scriptedResult.risk_level}`}
+          style={{ marginBottom: 16, borderColor: scriptedResult.error ? C.danger : C.danger }}
+        >
+          {scriptedResult.error ? (
+            <div style={{ color: C.danger, fontSize: "0.8125rem" }}>{scriptedResult.error}</div>
+          ) : (
+            <>
+              <div style={{ fontSize: "0.8125rem", color: C.text, marginBottom: 8 }}>
+                <span style={{ color: C.danger, fontWeight: 600 }}>[!] {scriptedResult.risk_level?.toUpperCase()}</span>
+                {" · "}call <span style={{ fontFamily: "monospace" }}>{scriptedResult.call_id?.slice(0, 8)}</span>
+                {scriptedResult.escalation_id && (
+                  <>{" · "}escalation <span style={{ fontFamily: "monospace", color: C.danger }}>{scriptedResult.escalation_id?.slice(0, 8)}</span></>
+                )}
+              </div>
+              {scriptedResult.risk_reasons && (
+                <div style={{ fontSize: "0.75rem", color: C.muted, marginBottom: 8 }}>
+                  reasons: {(() => { try { return JSON.parse(scriptedResult.risk_reasons).join(" · "); } catch { return scriptedResult.risk_reasons; } })()}
+                </div>
+              )}
+              <div style={{ fontSize: "0.75rem", color: C.muted, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Sim transcript (driven by the engine)
+              </div>
+              <div style={{ maxHeight: 160, overflow: "auto", fontSize: "0.75rem", color: C.secondary, fontFamily: "monospace", padding: 6, background: C.bg, border: `1px solid ${C.borderMuted}`, borderRadius: 4 }}>
+                {scriptedResult.events?.map((e: any, i: number) => (
+                  <div key={i} style={{ padding: "1px 0" }}>
+                    {e.type === "play" && <span><span style={{ color: C.accent }}>▸ play</span> [{e.clip}]</span>}
+                    {e.type === "expect_digit" && <span><span style={{ color: C.warning }}>▸ ?</span> {e.node_id} → options: {e.options?.map((o: any) => o.digit).join(",")}</span>}
+                    {e.type === "end" && <span><span style={{ color: C.muted }}>▸ end</span></span>}
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 10, fontSize: "0.75rem", color: C.muted }}>
+                ↳ refresh the page in 5s to see the new escalation appear in the SOS list and Board.
+              </div>
+            </>
+          )}
+        </Panel>
+      )}
 
       {importPreview && importPreview.length > 0 && (
         <Panel title={`import preview · ${importPreview.length} patients`} style={{ marginBottom: 16 }}>

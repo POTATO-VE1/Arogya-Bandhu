@@ -267,6 +267,10 @@ def patient_detail(pid: str, user: User = Depends(current_user), db: Session = D
             calls.append(dict(id=c.id, day_index=c.day_index, status=c.status,
                               risk=c.risk_level, risk_reasons=c.risk_reasons,
                               scheduled_at=c.scheduled_at, provider=c.provider,
+                              provider_call_sid=c.provider_call_sid,
+                              account_name=c.account_name,
+                              started_at=c.started_at,
+                              completed_at=c.completed_at,
                               responses=responses))
         escalations = [dict(id=x.id, level=x.level, status=x.status,
                             reasons=x.reasons, created_at=x.created_at,

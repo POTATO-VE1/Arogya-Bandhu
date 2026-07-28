@@ -42,7 +42,11 @@ type Enroll = {
     risk: string | null;
     risk_reasons: string | null;
     scheduled_at: string;
+    started_at?: string | null;
+    completed_at?: string | null;
     provider: string | null;
+    provider_call_sid?: string | null;
+    account_name?: string | null;
     responses: { node_id: string; digit: string; score: number }[];
   }[];
   escalations: { id: string; level: string; status: string; reasons: string; created_at: string }[];
@@ -238,13 +242,23 @@ export function PatientDetail() {
             <div key={c.id} style={{ borderTop: `1px solid ${C.borderMuted}`, padding: "8px 0" }}>
               <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                 <span>
-                  <strong>D{c.day_index}</strong> · {c.status} · {c.provider || "—"} ·{" "}
+                  <strong>D{c.day_index}</strong> · {c.status} · {c.provider || "—"}{" "}
+                  {c.account_name && (
+                    <span style={{ fontSize: "0.75rem", color: C.accent, marginLeft: 4 }}>
+                      via <strong>{c.account_name}</strong>
+                    </span>
+                  )}{" "}
                   <RiskBadge level={c.risk} />
                 </span>
                 <span style={{ color: C.muted, fontSize: "0.75rem" }}>
                   {new Date(c.scheduled_at).toLocaleString()}
                 </span>
               </div>
+              {c.provider_call_sid && (
+                <div style={{ fontSize: "0.6875rem", color: C.muted, paddingLeft: 8, fontFamily: "monospace" }}>
+                  call_sid: {c.provider_call_sid}
+                </div>
+              )}
               {c.responses.map((r, i) => (
                 <div key={i} style={{ color: C.secondary, fontSize: "0.8125rem", paddingLeft: 12 }}>
                   ◂ {resolveLabel(proto, r.node_id, r.digit)}

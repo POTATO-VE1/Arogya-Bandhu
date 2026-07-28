@@ -11,6 +11,7 @@ import { Escalations } from "./pages/Escalations";
 import { PatientDetail } from "./pages/PatientDetail";
 import { Sheet } from "./pages/Sheet";
 import { Demo } from "./pages/Demo";
+import { TwilioHealthPage } from "./pages/TwilioHealthPage";
 import { Import } from "./pages/Import";
 import { PrintPatient } from "./pages/PrintPatient";
 import { Staff } from "./pages/Staff";
@@ -216,6 +217,26 @@ function Shell({ children }: { children: ReactNode }) {
               )}
             </NavLink>
           )}
+          {user?.role === "admin" && (
+            <NavLink to="/twilio"
+              style={({ isActive }) => ({
+                display: "block",
+                color: isActive ? C.text : C.muted,
+                textDecoration: "none",
+                fontSize: "0.8125rem",
+                padding: "8px 10px",
+                borderLeft: isActive ? `2px solid ${C.accent}` : "2px solid transparent",
+                background: isActive ? C.elevated : "transparent",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              })}
+              title="Live status of every configured Twilio account"
+            >
+              {({ isActive }) => (
+                <>{isActive ? "▸ " : "  "}Twilio Accounts</>
+              )}
+            </NavLink>
+          )}
 
           <div style={{ marginTop: "auto", paddingTop: 16, borderTop: `1px solid ${C.borderMuted}` }}>
             {/* Theme + language toggles */}
@@ -373,6 +394,7 @@ export default function App() {
               <Route path="/import" element={<Protected><Import /></Protected>} />
               <Route path="/escalations" element={<Protected><Escalations /></Protected>} />
               <Route path="/demo" element={<Protected><Demo /></Protected>} />
+              <Route path="/twilio" element={<Protected><TwilioHealthPage /></Protected>} />
               <Route path="/patients/:id" element={<Protected><PatientDetail /></Protected>} />
               <Route path="/sheet/:eid" element={<Protected><Sheet /></Protected>} />
               <Route path="/print/patient/:id" element={<Protected><PrintPatient /></Protected>} />

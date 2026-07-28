@@ -12,11 +12,11 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from app.db import SessionLocal
+from app.db import SessionLocal, get_db, now_utc
 from app.deps import current_user
 from app.events import publish
 from app.ivr import engine
-from app.models import Enrollment, FollowupCall, Patient, User
+from app.models import Enrollment, Escalation, FollowupCall, Patient, User
 
 log = logging.getLogger("sim")
 router = APIRouter(tags=["sim"])
@@ -123,3 +123,109 @@ async def sim_call(ws: WebSocket):
             await sender_task
         except Exception:
             pass
+
+# ── scripted demo: drive a sim call to red with one click ──────────────────
+# The judge watches a full call go: greet → confirm family → questions →
+# patient says "chest pain" → red escalation created → callback scheduled.
+# Used by the one-click "demo escalation scenario" button on the Board.
+# This is a synchronous endpoint that drives the same engine the WebSocket
+# uses, but pre-supplies the answers that lead to @end_red.
+
+SCRIPTED_RED_ANSWERS = {
+    "confirm_family": "1",   # yes, this is the right person
+    "q_wound": "1",          # wound looks fine
+    "q_fever": "1",          # no fever
+    "q_breath": "3",         # chest pain / can't breathe (RED)
+    "q_symptom_course": "2", # symptoms got worse (RED)
+    "q_meds_today": "1",     # took all meds
+    "q_pillcount": "2",      # some pills left
+    "q_pillcount_remaining": "2",
+    "q_self_med": "1",       # no extra meds
+    "q_leftover": "1",       # no leftover antibiotics
+    "q_course_done": "1",    # almost done
+}
+
+
+class ScriptedSim:
+    """In-process simulation transport. Same interface as _SimTransport
+    but writes events to a list instead of a WebSocket — used by the
+    scripted /api/demo/scripted-red endpoint so the judge can click
+    once and see a full red call on the dashboard."""
+
+    def __init__(self):
+        self.events: list[dict] = []
+        self._expect_node: str | None = None
+
+    def play(self, clip_id: str) -> None:
+        from app.protocol_loader import get_deck
+        en = get_deck().get(clip_id, {}).get("en", "")
+        self.events.append({"type": "play", "clip": clip_id, "en": en})
+
+    def expect_digit(self, node_id: str, options: dict | None = None,
+                     timeout_s: int = 6) -> None:
+        opts = []
+        if options:
+            for digit, opt in options.items():
+                opts.append({"digit": digit, "reason": opt.get("reason")})
+        self.events.append({"type": "expect_digit", "node_id": node_id, "options": opts})
+        self._expect_node = node_id
+
+    def hangup(self) -> None:
+        self.events.append({"type": "end"})
+
+
+@router.post("/api/demo/scripted-red")
+def scripted_red(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """One-click demo: drive a fresh sim call all the way to @end_red
+    using scripted patient answers. Creates a new FollowupCall, walks
+    the engine, returns the event log + the resulting Escalation (if
+    any) so the dashboard reflects it in real time.
+
+    Returns:
+      { call_id, risk_level, escalation_id, events: [...] }
+    """
+    e = db.query(Enrollment).filter(
+        Enrollment.status == "active",
+    ).order_by(Enrollment.created_at.desc()).first()
+    if not e:
+        raise HTTPException(503, "no active enrollment to demo with")
+
+    c = FollowupCall(
+        hospital_code=e.hospital_code, enrollment_id=e.id,
+        day_index=0, scheduled_at=now_utc(), provider="sim",
+        kind="demo", status="pending", triggered_by=user.id,
+    )
+    db.add(c); db.commit(); db.refresh(c)
+    call_id = c.id
+
+    transport = ScriptedSim()
+    # Drive start_call
+    engine.start_call(db, call_id, transport)
+    # Walk through questions with scripted answers until terminal
+    max_steps = 50
+    while max_steps > 0:
+        max_steps -= 1
+        if not transport._expect_node:
+            break
+        node = transport._expect_node
+        digit = SCRIPTED_RED_ANSWERS.get(node, "1")
+        engine.handle_digit(db, call_id, digit, transport)
+
+    db.refresh(c)
+    result = {
+        "call_id": call_id,
+        "patient_id": e.patient_id,
+        "enrollment_id": e.id,
+        "risk_level": c.risk_level,
+        "risk_reasons": c.risk_reasons,
+        "status": c.status,
+        "events": transport.events,
+    }
+    if c.risk_level == "red":
+        esc = db.query(Escalation).filter(
+            Escalation.call_id == call_id,
+        ).first()
+        if esc:
+            result["escalation_id"] = esc.id
+            result["escalation_level"] = esc.level
+    return result
