@@ -165,6 +165,76 @@ def _health_check_twilio_accounts() -> None:
             log.warning("twilio health: %s %s", name, status)
 
 
+def _daily_checkin() -> None:
+    """Periodic daily check-in (every 24h via APScheduler). For each
+    verified severe-case patient, DM them 'how are you feeling today?'
+    in their preferred language and set current_step=collecting_feeling
+    so their reply is captured into feeling_info.
+
+    Skips:
+    - patients not yet verified
+    - patients whose check-in is already done today
+    - any patient whose enrollment isn't 'severe' (wound_care /
+      antibiotic_course / post_surgical)
+    """
+    from datetime import datetime, timezone
+    from app.telegram.bot import _send
+    from app.telegram.sessions import get_session, save_session
+    from app.models import TelegramSession, Enrollment, Patient
+    from app.config import settings
+
+    log = logging.getLogger("telegram.checkin")
+    if not settings.TELEGRAM_BOT_TOKEN:
+        return
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    SEVERE = ("wound_care", "antibiotic_course", "post_surgical")
+    s = SessionLocal()
+    try:
+        rows = s.query(TelegramSession).filter(
+            TelegramSession.is_verified == 1,
+            TelegramSession.telegram_id.isnot(None),
+        ).all()
+        sent = 0
+        for ts in rows:
+            if ts.last_checkin_date == today:
+                continue
+            # Confirm patient is severe-case
+            if not ts.patient_id:
+                continue
+            en = s.query(Enrollment).filter(
+                Enrollment.patient_id == ts.patient_id,
+                Enrollment.status == "active",
+            ).first()
+            if not en or en.protocol_id not in SEVERE:
+                continue
+            lang = ts.preferred_lang or "en"
+            if lang == "kn":
+                msg = ("[!] ದೈನಂದಿನ ಆರೋಗ್ಯ ಪರಿಶೀಲನೆ\n\n"
+                       "[?] ನಿಮ್ಮ ಆರೋಗ್ಯ ಸ್ಥಿತಿ ಹೇಗಿದೆ ಇಂದು?\n"
+                       "ಉದಾ: 'ಉತ್ತಮ ಚೇತರಿಕೆ', 'ಸ್ವಲ್ಪ ನೋವು', 'ಜ್ವರ ಕಡಿಮೆಯಾಗಿದೆ'")
+            else:
+                msg = ("[!] Daily check-in\n\n"
+                       "[?] How are you feeling today?\n"
+                       "Example: 'Recovering well', 'Some pain', 'Fever has reduced'")
+            try:
+                _send(settings.TELEGRAM_BOT_TOKEN, int(ts.telegram_id), msg)
+                # Mark step so the next message is captured as feeling.
+                ts.current_step = "collecting_feeling"
+                ts.last_checkin_date = today
+                sent += 1
+            except Exception as ex:
+                log.warning("daily check-in send failed for %s: %s", ts.telegram_id, ex)
+        if sent:
+            s.commit()
+        log.info("daily check-in: %d patients pinged", sent)
+    except Exception as ex:
+        log.exception("daily check-in failed: %s", ex)
+        s.rollback()
+    finally:
+        s.close()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     _validate_startup()
@@ -198,6 +268,24 @@ async def lifespan(_app: FastAPI):
     except Exception as ex:
         logging.getLogger("twilio.health").warning(
             "could not register periodic Twilio health check: %s", ex)
+
+    # Daily check-in: every 24h, ask each verified severe-case patient
+    # "how are you feeling today?" in their preferred language. The
+    # patient's reply is captured by the regular handler (it will see
+    # current_step=collecting_feeling after the check-in prompt).
+    try:
+        from apscheduler.triggers.interval import IntervalTrigger
+        from app.scheduler import ensure_scheduler
+        sched = ensure_scheduler()
+        sched.add_job(
+            _daily_checkin,
+            trigger=IntervalTrigger(hours=24),
+            id="telegram_daily_checkin", replace_existing=True,
+        )
+        logging.getLogger("telegram.checkin").info("daily check-in job registered")
+    except Exception as ex:
+        logging.getLogger("telegram.checkin").warning(
+            "could not register daily check-in: %s", ex)
     # start telegram polling in background (only if token configured)
     tg_task = None
     if settings.TELEGRAM_BOT_TOKEN:

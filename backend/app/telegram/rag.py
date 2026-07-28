@@ -213,30 +213,93 @@ def ask_llm(
 
 
 def _fallback_response(query: str, patient_ctx: dict | None, is_staff: bool, lang: str = "en") -> str:
-    """Deterministic fallback when LLM is unavailable."""
+    """Deterministic fallback when LLM is unavailable. Bilingual — handles
+    Kannada vocabulary so a patient who writes in Kannada without the LLM
+    still gets a sensible response."""
     q = query.lower()
 
     if lang == "kn":
-        if any(w in q for w in ["med", "medicine", "tablet", "ಔಷಧ", "ಗೋಳಿ"]):
+        # Medicine / drug keywords (multiple forms: official + colloquial)
+        med_kw = ["med", "medicine", "tablet", "drug", "pill", "dose",
+                  "ಔಷಧ", "ಗೋಳಿ", "ಮಾತ್ರೆ", "ಔಷಧಿ", "ಡೋಸ್"]
+        # Wound / surgery keywords
+        wound_kw = ["wound", "surgery", "stitches", "cut", "scar",
+                    "ಗಾಯ", "ಶಸ್ತ್ರ", "ಕೊಯ್ತ", "ಹೊಲಿಗೆ"]
+        # Fever / temperature
+        fever_kw = ["fever", "temperature", "hot", "ಜ್ವರ", "ಬಿಸಿ", "ತಾಪ"]
+        # Pain
+        pain_kw = ["pain", "ache", "hurt", "sore",
+                   "ನೋವು", "ನೋಯ", "ಹುಣ್ಣು", "ಹಿಡಿತ"]
+        # Vomiting / nausea
+        vomit_kw = ["vomit", "nausea", "throw up", "puke",
+                    "ವಾಂತಿ", "ಓಕರಿಕೆ", "ಕೆಮ್ಮು"]
+        # Cough / cold (minor — not severe)
+        cough_kw = ["cough", "cold", "runny nose", "sneeze",
+                    "ಕೆಮ್ಮು", "ಶೀತ", "ಸೀನು"]
+        # Diet
+        diet_kw = ["diet", "food", "eat", "ಆಹಾರ", "ತಿನ್ನು", "ಊಟ"]
+        # SOS / help
+        sos_kw = ["sos", "help", "emergency", "danger", "ಸಹಾಯ", "ಅಪಾಯ", "ತುರ್ತು"]
+
+        if any(w in q for w in sos_kw):
+            return ("[!] ತುರ್ತು ಸಹಾಯ: ತಕ್ಷಣ 104 ಅಥವಾ 108 ಗೆ ಕರೆ ಮಾಡಿ. "
+                    "ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ವೈದ್ಯರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ.")
+        if any(w in q for w in med_kw):
             if patient_ctx and patient_ctx.get("meds"):
-                return f"ನಿಮ್ಮ ಔಷಧಿಗಳು: {patient_ctx['meds']}\nಸಮಯಕ್ಕೆ ತೆಗೆದುಕೊಳ್ಳಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104 ಗೆ ಕರೆ ಮಾಡಿ."
+                return (f"ನಿಮ್ಮ ಔಷಧಿಗಳು: {patient_ctx['meds']}\n"
+                        f"ಸಮಯಕ್ಕೆ ತೆಗೆದುಕೊಳ್ಳಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104 ಗೆ ಕರೆ ಮಾಡಿ.")
             return "ನಿಮ್ಮ ಔಷಧಿಗಳನ್ನು ನೋಡಲು, ಮೊದಲು ಫೋನ್ ನಂಬರ್ ಪರಿಶೀಲಿಸಿ."
-        if any(w in q for w in ["wound", "ಗಾಯ", "surgery"]):
-            return "ಗಾಯವನ್ನು ಸ್ವಚ್ಛವಾಗಿ ಮತ್ತು ಒಣಗಿಸಿ. ಪುಸ್ ಅಥವಾ ಜ್ವರ ಕಂಡರೆ — ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104/108 ಗೆ ಕರೆ ಮಾಡಿ."
-        if any(w in q for w in ["fever", "ಜ್ವರ"]):
-            return "ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ ಮತ್ತು ಹೆಚ್ಚು ನೀರು ಕುಡಿಯಿರಿ. ಜ್ವರ 3 ದಿನಕ್ಕಿಂತ ಹೆಚ್ಚು ಇದ್ದರೆ, ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ."
-        return "ನಾನು ನಿಮ್ಮ ಚೇತರಿಕೆಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104 ಅಥವಾ 108 ಗೆ ಕರೆ ಮಾಡಿ."
+        if any(w in q for w in wound_kw):
+            return ("ಗಾಯವನ್ನು ಸ್ವಚ್ಛವಾಗಿ ಮತ್ತು ಒಣಗಿಸಿ. ಪುಸ್ ಅಥವಾ ಜ್ವರ ಕಂಡರೆ — "
+                    "ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104/108 ಗೆ ಕರೆ ಮಾಡಿ.")
+        if any(w in q for w in fever_kw):
+            return ("ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ ಮತ್ತು ಹೆಚ್ಚು ನೀರು ಕುಡಿಯಿರಿ. "
+                    "ಜ್ವರ 3 ದಿನಕ್ಕಿಂತ ಹೆಚ್ಚು ಇದ್ದರೆ, ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ.")
+        if any(w in q for w in pain_kw):
+            return ("ನೋವು ಹೆಚ್ಚಾಗಿದ್ದರೆ ಅಥವಾ ಮೂರು ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಇದ್ದರೆ "
+                    "ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104/108 ಗೆ ಕರೆ ಮಾಡಿ.")
+        if any(w in q for w in vomit_kw):
+            return ("ವಾಂತಿ ಮುಂದುವರೆದರೆ ORS ಕುಡಿಯಿರಿ ಮತ್ತು ಆಸ್ಪತ್ರೆಗೆ ಹೋಗಿ. "
+                    "ರಕ್ತ ಸೇರಿದರೆ ತಕ್ಷಣ 104 ಗೆ ಕರೆ ಮಾಡಿ.")
+        if any(w in q for w in cough_kw):
+            return ("ಬೆಚ್ಚಗಿನ ನೀರು ಕುಡಿಯಿರಿ, ವಿಶ್ರಾಂತಿ ತೆಗೆದುಕೊಳ್ಳಿ. "
+                    "5 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಇದ್ದರೆ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡಿ.")
+        if any(w in q for w in diet_kw):
+            return ("ಸಮತೋಲನ ಆಹಾರ ಸೇವಿಸಿ. ಔಷಧಿ ತೆಗೆದುಕೊಳ್ಳುವ ಮೊದಲು "
+                    "ವೈದ್ಯರ ಸಲಹೆ ಪಡೆಯಿರಿ.")
+        return ("ನಾನು ನಿಮ್ಮ ಚೇತರಿಕೆಗೆ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. "
+                "ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104 ಅಥವಾ 108 ಗೆ ಕರೆ ಮಾಡಿ. "
+                "ಇಂಗ್ಲಿಷ್‌ಗೆ ಬದಲಾಯಿಸಲು /lang en ಟೈಪ್ ಮಾಡಿ.")
 
     # English fallbacks
-    if any(w in q for w in ["med", "medicine", "tablet"]):
+    med_kw = ["med", "medicine", "tablet", "drug", "pill", "dose"]
+    wound_kw = ["wound", "surgery", "stitches", "cut", "scar"]
+    fever_kw = ["fever", "temperature", "hot"]
+    pain_kw = ["pain", "ache", "hurt", "sore"]
+    vomit_kw = ["vomit", "nausea", "throw up", "puke"]
+    cough_kw = ["cough", "cold", "runny nose", "sneeze"]
+    sos_kw = ["sos", "help", "emergency", "danger"]
+
+    if any(w in q for w in sos_kw):
+        return ("[!] Emergency: Call 104 or 108 NOW. "
+                "Your message has been forwarded to the doctor's dashboard.")
+    if any(w in q for w in med_kw):
         if patient_ctx and patient_ctx.get("meds"):
-            return f"Your medications: {patient_ctx['meds']}\nTake them on time. For emergencies call 104."
+            return (f"Your medications: {patient_ctx['meds']}\n"
+                    f"Take them on time. For emergencies call 104.")
         return "Please verify your phone number first to see your medications."
-
-    if any(w in q for w in ["wound", "surgery"]):
-        return "Keep the wound clean and dry. If you see pus or fever, go to hospital immediately. Call 104/108 for emergencies."
-
-    if any(w in q for w in ["fever", "temperature"]):
-        return "Rest and drink plenty of fluids. If fever lasts more than 3 days, go to hospital."
-
-    return "I can help with your recovery. For emergencies call 104 or 108."
+    if any(w in q for w in wound_kw):
+        return ("Keep the wound clean and dry. If you see pus or fever, "
+                "go to hospital immediately. Call 104/108 for emergencies.")
+    if any(w in q for w in fever_kw):
+        return ("Rest and drink plenty of fluids. "
+                "If fever lasts more than 3 days, go to hospital.")
+    if any(w in q for w in pain_kw):
+        return ("If the pain is severe or lasts more than 3 days, "
+                "go to hospital. For emergencies call 104/108.")
+    if any(w in q for w in vomit_kw):
+        return ("If vomiting continues, drink ORS and go to hospital. "
+                "If there's blood, call 104 immediately.")
+    if any(w in q for w in cough_kw):
+        return ("Drink warm water and rest. If it persists more than 5 days, see a doctor.")
+    return "I can help with your recovery. For emergencies call 104 or 108. Switch to /lang kn for Kannada."

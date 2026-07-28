@@ -129,6 +129,13 @@ def resolve(eid: str, body: ResolveBody,
     x.resolution_note = body.note
     db.commit()
 
+    # Notify the patient via Telegram (best-effort, never fails the request)
+    try:
+        from app.telegram.bot import notify_patient_escalation_resolved
+        notify_patient_escalation_resolved(x.id, body.note)
+    except Exception:
+        pass
+
     # Schedule a manual callback if requested
     new_call_id: str | None = None
     if body.callback_in_hours is not None:

@@ -214,6 +214,8 @@ class TelegramSession(Base):
     medication_info: Mapped[str | None] = mapped_column(Text, nullable=True)
     feeling_info: Mapped[str | None] = mapped_column(Text, nullable=True)
     google_fit_consent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # ISO date string of the last daily check-in (so we don't ping twice a day)
+    last_checkin_date: Mapped[str | None] = mapped_column(Text, nullable=True)
     current_step: Mapped[str | None] = mapped_column(Text, nullable=True)
     updated_at: Mapped[str] = mapped_column(Text, nullable=False, default=now_utc)
 

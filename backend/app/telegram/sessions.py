@@ -33,6 +33,12 @@ class Session:
     medication_info: str | None = None
     feeling_info: str | None = None
     google_fit_consent: bool = False
+    # Bilingual stickiness: count of consecutive messages in a different
+    # language than preferred_lang. 3 flips the preference.
+    lang_streak: int = 0
+    # Set to True when the patient has been asked the daily check-in
+    # question today (so we don't spam).
+    last_checkin_date: str | None = None
     current_step: str | None = None
     # auth-failure counter (imperative flow). Persisted in DB so
     # /reset → /start cycle actually clears it.
@@ -96,6 +102,7 @@ def get_session(telegram_id: int) -> Session:
                 medication_info=getattr(ts, "medication_info", None),
                 feeling_info=getattr(ts, "feeling_info", None),
                 google_fit_consent=bool(ts.google_fit_consent),
+                last_checkin_date=getattr(ts, "last_checkin_date", None),
                 current_step=ts.current_step,
                 auth_attempts=getattr(ts, "auth_attempts", 0) or 0,
             )
@@ -150,6 +157,7 @@ def save_session(session: Session) -> None:
         ts.medication_info = session.medication_info
         ts.feeling_info = session.feeling_info
         ts.google_fit_consent = 1 if session.google_fit_consent else 0
+        ts.last_checkin_date = getattr(session, "last_checkin_date", None)
         ts.current_step = session.current_step
         ts.updated_at = now_utc()
         s_db.commit()
@@ -174,6 +182,7 @@ def reset_session(session: Session) -> None:
     session.medication_info = None
     session.feeling_info = None
     session.google_fit_consent = False
+    session.last_checkin_date = None
     session.current_step = "awaiting_phone"
     session.preferred_lang = "en"
     save_session(session)
@@ -257,7 +266,11 @@ def get_patient_report_by_id(patient_id: str) -> dict | None:
 
 def get_patient_reports(patient_id: str) -> list[dict]:
     """Fetch uploaded medical reports (lab reports, discharge summaries, etc)
-    for a patient, ordered most-recent first. Returns empty list if none."""
+    for a patient, ordered most-recent first. Returns empty list if none.
+    `extracted_data` is a parsed dict (key→value) parsed from the JSON
+    stored in the DB, or None if no extraction was done yet.
+    """
+    import json as _json
     from app.health_fit import PatientReport
     s = SessionLocal()
     try:
@@ -267,16 +280,23 @@ def get_patient_reports(patient_id: str) -> list[dict]:
             .order_by(PatientReport.uploaded_at.desc())
             .all()
         )
-        return [
-            {
+        results = []
+        for r in rows:
+            parsed = None
+            if r.extracted_data:
+                try:
+                    parsed = _json.loads(r.extracted_data)
+                except Exception:
+                    parsed = None
+            results.append({
                 "id": r.id,
                 "filename": r.filename,
                 "report_type": r.report_type,
                 "uploaded_at": r.uploaded_at,
                 "uploaded_by": r.uploaded_by,
-            }
-            for r in rows
-        ]
+                "extracted": parsed,
+            })
+        return results
     finally:
         s.close()
 

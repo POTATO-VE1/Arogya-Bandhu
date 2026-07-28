@@ -313,3 +313,146 @@ class TestPatientReport:
     def test_get_patient_report_by_id_unknown_returns_none(self):
         from app.telegram.sessions import get_patient_report_by_id
         assert get_patient_report_by_id("nonexistent-uuid-xxx") is None
+
+
+# ── Bilingual fallback responses (B2) ─────────────────────────────────────────
+
+class TestFallbackResponseBilingual:
+    """The deterministic fallback (no LLM) must handle both languages and
+    multiple vocabulary variants. Critical for Kannada-speaking patients
+    when all GROQ keys are on cooldown."""
+
+    def test_english_medicine_keyword(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("what medicine should I take", None, False, lang="en")
+        assert "verify your phone" in r.lower() or "104" in r
+
+    def test_english_medicine_with_patient(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("medicine", {"meds": "Amoxiclav 625mg"}, False, lang="en")
+        assert "Amoxiclav" in r
+
+    def test_kannada_medicine_official(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಔಷಧ", None, False, lang="kn")
+        # Falls back to "verify your phone" since no patient context
+        assert "ಫೋನ್" in r or "104" in r
+
+    def test_kannada_medicine_colloquial_tablet(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಮಾತ್ರೆ", None, False, lang="kn")
+        # Without patient ctx, should not be a generic catch-all
+        assert "verify" not in r.lower()
+        assert "104" in r or "ಔಷಧ" in r or "ಫೋನ್" in r
+
+    def test_kannada_wound(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಗಾಯ ಇದೆ", None, False, lang="kn")
+        assert "104" in r
+        assert "ಗಾಯ" in r or "ಪುಸ್" in r or "ಆಸ್ಪತ್ರೆ" in r
+
+    def test_kannada_fever(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಜ್ವರ", None, False, lang="kn")
+        assert "104" in r or "ಆಸ್ಪತ್ರೆ" in r
+
+    def test_kannada_vomiting(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ವಾಂತಿ", None, False, lang="kn")
+        assert "ORS" in r or "104" in r
+
+    def test_kannada_sos_priority(self):
+        """SOS in Kannada should be answered FIRST, before any other keyword."""
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಸಹಾಯ ಬೇಕು", None, False, lang="kn")
+        assert "104" in r
+        # Should NOT be the generic catch-all
+        assert "ಚೇತರಿಕೆಗೆ ಸಹಾಯ" not in r
+
+    def test_english_sos_priority(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("emergency help", None, False, lang="en")
+        assert "104" in r
+        assert "I can help" not in r
+
+    def test_kannada_unknown_falls_through(self):
+        from app.telegram.rag import _fallback_response
+        r = _fallback_response("ಏನೂ ಅರ್ಥ ಆಗುತ್ತಿಲ್ಲ", None, False, lang="kn")
+        # Default catch-all
+        assert "104" in r
+
+
+# ── Language detection + stickiness (B1) ─────────────────────────────────────
+
+class TestLanguageDetection:
+    def test_english_detected(self):
+        from app.telegram.bot import _detect_language
+        assert _detect_language("Hello, how are you?") == "en"
+
+    def test_kannada_detected(self):
+        from app.telegram.bot import _detect_language
+        assert _detect_language("ನಮಸ್ಕಾರ, ಹೇಗಿದ್ದೀರಿ?") == "kn"
+
+    def test_mixed_with_kannada_chars(self):
+        from app.telegram.bot import _detect_language
+        # Even one Kannada char → 'kn'
+        assert _detect_language("hello ನಮಸ್ಕಾರ") == "kn"
+
+    def test_empty_returns_en(self):
+        from app.telegram.bot import _detect_language
+        assert _detect_language("") == "en"
+
+
+# ── Severe-case gate (P2) ────────────────────────────────────────────────────
+
+class TestSevereProtocols:
+    SEVERE = {"wound_care", "antibiotic_course", "post_surgical"}
+
+    def test_severe_protocols_set(self):
+        from app.telegram.sessions import SEVERE_PROTOCOLS
+        assert "wound_care" in SEVERE_PROTOCOLS
+        assert "antibiotic_course" in SEVERE_PROTOCOLS
+        assert "post_surgical" in SEVERE_PROTOCOLS
+
+    def test_minor_protocols_excluded(self):
+        from app.telegram.sessions import SEVERE_PROTOCOLS
+        # General recovery / common cold type protocols should NOT be severe
+        for minor in ("general", "fever", "cough"):
+            assert minor not in SEVERE_PROTOCOLS
+
+
+# ── Lang streak helper (B1 sticky) ───────────────────────────────────────────
+
+class TestLangStreak:
+    def test_initial_preferred_set_on_first_message(self):
+        """When session has no preferred_lang, detect from first message."""
+        from app.telegram.sessions import Session
+        s = Session(telegram_id=12345)
+        assert s.preferred_lang in (None, "en", "kn")
+        assert s.lang_streak == 0
+
+
+# ── Admin supervisor validation (P7) ──────────────────────────────────────────
+
+class TestSupervisorValidation:
+    def test_validate_supervisor_empty(self, db):
+        from app.telegram.admin_bot import _validate_supervisor
+        from app.db import SessionLocal
+        s = SessionLocal()
+        try:
+            ok, msg = _validate_supervisor(s, "")
+            assert not ok
+            assert "required" in msg.lower() or "supervisor" in msg.lower()
+        finally:
+            s.close()
+
+    def test_validate_supervisor_nonexistent(self, db):
+        from app.telegram.admin_bot import _validate_supervisor
+        from app.db import SessionLocal
+        s = SessionLocal()
+        try:
+            ok, msg = _validate_supervisor(s, "ghost.user")
+            assert not ok
+            assert "not found" in msg.lower()
+        finally:
+            s.close()

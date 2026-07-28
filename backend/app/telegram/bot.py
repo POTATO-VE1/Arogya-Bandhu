@@ -266,7 +266,8 @@ def _send_alert_to_doctors(patient_data: dict, message: str, severity: str, esc_
             f"Severity: {severity.upper()}\n"
             f"Message: \"{message[:200]}\"\n\n"
             f"Open the doctor's dashboard: {settings.PUBLIC_BASE_URL}/escalations\n"
-            f"Escalation ID: {esc_id[:8]}"
+            f"Escalation ID: {esc_id[:8]}\n\n"
+            f"Reply via bot: /reply {esc_id[:8]} <your note>"
         )
         for d in doctors:
             try:
@@ -275,6 +276,50 @@ def _send_alert_to_doctors(patient_data: dict, message: str, severity: str, esc_
                      disable_web_page_preview=True)
             except Exception as e:
                 log.warning("doctor DM failed for %s: %s", d.username, e)
+    finally:
+        s.close()
+
+
+def notify_patient_escalation_resolved(escalation_id: str, note: str) -> bool:
+    """Called by the escalation-resolve API path: DM the patient that
+    their escalation has been resolved and include the doctor's note.
+    Returns True if the message was sent.
+    """
+    from app.models import Escalation, Enrollment, TelegramSession
+    s = SessionLocal()
+    try:
+        x = s.query(Escalation).filter(Escalation.id == escalation_id).first()
+        if not x:
+            return False
+        en = s.query(Enrollment).filter(Enrollment.id == x.enrollment_id).first()
+        if not en:
+            return False
+        ts = s.query(TelegramSession).filter(
+            TelegramSession.patient_id == en.patient_id,
+            TelegramSession.is_verified == 1,
+        ).first()
+        if not ts or not ts.telegram_id:
+            return False
+        lang = ts.preferred_lang or "en"
+        if lang == "kn":
+            text = (
+                "[OK] ನಿಮ್ಮ ತುರ್ತು ಎಚ್ಚರಿಕೆಯನ್ನು ವೈದ್ಯರು ಪರಿಶೀಲಿಸಿದ್ದಾರೆ.\n\n"
+                f"[N] ವೈದ್ಯರ ಸಲಹೆ: {note[:500]}\n\n"
+                "ಏನಾದರೂ ಹೊಸ ತೊಂದರೆ ಇದ್ದರೆ ತಿಳಿಸಿ. ತುರ್ತು ಸಂದರ್ಭದಲ್ಲಿ 104/108 ಗೆ ಕರೆ ಮಾಡಿ."
+            )
+        else:
+            text = (
+                "[OK] Your alert has been reviewed by a doctor.\n\n"
+                f"[N] Doctor's note: {note[:500]}\n\n"
+                "Let me know if anything new comes up. For emergencies call 104/108."
+            )
+        _api(settings.TELEGRAM_BOT_TOKEN, "sendMessage",
+             chat_id=int(ts.telegram_id), text=text,
+             disable_web_page_preview=True)
+        return True
+    except Exception as e:
+        log.warning("notify_patient_escalation_resolved failed for %s: %s", escalation_id, e)
+        return False
     finally:
         s.close()
 
@@ -303,8 +348,23 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
     text = raw_text[:500]
 
     session = get_session(telegram_id)
-    lang = _detect_language(text)
-    session.preferred_lang = lang
+    detected = _detect_language(text)
+    # Bilingual stickiness: the persisted preferred_lang wins unless the
+    # patient has written in a different language 3 times in a row. This
+    # way an English hiccup doesn't yank a Kannada-speaking patient into
+    # English mid-conversation. Use /lang en or /lang kn for an explicit
+    # switch.
+    if not session.preferred_lang:
+        session.preferred_lang = detected
+        session.lang_streak = 0
+    elif detected and detected != session.preferred_lang:
+        session.lang_streak = (getattr(session, "lang_streak", 0) or 0) + 1
+        if session.lang_streak >= 3:
+            session.preferred_lang = detected
+            session.lang_streak = 0
+    else:
+        session.lang_streak = 0
+    lang = session.preferred_lang or detected
 
     # Rate limit (in-memory window)
     allowed, retry = check_rate_limit(session)
@@ -429,6 +489,25 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
             _send(token, chat_id, "Session reset. Send /start to sign in again.")
             return
 
+        if cmd == "/lang":
+            parts = text.split(maxsplit=1)
+            if len(parts) < 2 or parts[1].strip().lower() not in ("en", "kn", "english", "kannada"):
+                _send(token, chat_id, (
+                    "Usage: /lang en  or  /lang kn\n"
+                    "Current language: " + (lang or "en") + "\n"
+                    "Your language is sticky — it only changes after 3 messages in a different language, or with this command."
+                ))
+                return
+            new_lang = "kn" if parts[1].strip().lower() in ("kn", "kannada") else "en"
+            session.preferred_lang = new_lang
+            session.lang_streak = 0
+            save_session(session)
+            if new_lang == "kn":
+                _send(token, chat_id, "[OK] ಭಾಷೆ ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿಸಲಾಗಿದೆ. ಈಗ ನಾನು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸುತ್ತೇನೆ.")
+            else:
+                _send(token, chat_id, "[OK] Language switched to English. I'll reply in English from now on.")
+            return
+
         if cmd == "/diet":
             session.current_step = "collecting_diet"
             save_session(session)
@@ -499,7 +578,8 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
                 else:
                     _send(token, chat_id, "[R] No medical reports uploaded yet.")
                 return
-            # Telegram message limit is 4096 chars; show top 10 most recent.
+            # Telegram message limit is 4096 chars. Show top 5 with extracted
+            # values so the patient actually sees their lab numbers.
             lines = ["[R] Your Medical Reports (most recent first):\n"]
             type_labels = {
                 "lab_report": "Lab Report",
@@ -507,17 +587,19 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
                 "prescription": "Prescription",
                 "other": "Other",
             }
-            for idx, r in enumerate(reports[:10], 1):
+            for idx, r in enumerate(reports[:5], 1):
                 t = type_labels.get(r["report_type"], r["report_type"])
-                # Trim the timestamp to a date.
                 when = r["uploaded_at"][:10] if r["uploaded_at"] else "—"
                 lines.append(f"{idx}. [{t}] {r['filename']} — {when}")
-            if len(reports) > 10:
-                lines.append(f"\n… and {len(reports) - 10} more. Ask your nurse for full access.")
-            lines.append(
-                f"\nFull records: {settings.PUBLIC_BASE_URL}/staff/patient-reports"
-                if settings.PUBLIC_BASE_URL else ""
-            )
+                if r.get("extracted"):
+                    # Show up to 6 key-value pairs from the extraction
+                    for k, v in list(r["extracted"].items())[:6]:
+                        v_str = str(v)[:80]
+                        lines.append(f"   • {k}: {v_str}")
+            if len(reports) > 5:
+                lines.append(f"\n… and {len(reports) - 5} more. Ask your nurse for full access.")
+            if settings.PUBLIC_BASE_URL:
+                lines.append(f"\nFull records: {settings.PUBLIC_BASE_URL}/staff/patient-reports")
             _send(token, chat_id, "\n".join(lines))
             return
 
@@ -551,6 +633,63 @@ def _handle_message(token: str, msg: dict[str, Any]) -> None:
                 _send(token, chat_id, (
                     f"[OK] Telegram linked to @{u.username} ({u.role}, {u.display_name}).\n\n"
                     f"You will now receive direct alerts for severe patients."
+                ))
+            finally:
+                s.close()
+            return
+
+        if cmd.startswith("/reply"):
+            # /reply <esc_id_short> <note> — doctor (or nurse) replies to a
+            # patient escalation via Telegram. Resolves the escalation and
+            # DMs the patient. Requires the sender to be a linked doctor/nurse.
+            from app.models import User, Escalation
+            # Verify sender is a linked medical staff
+            s = SessionLocal()
+            try:
+                u = s.query(User).filter(
+                    User.telegram_id == telegram_id,
+                    User.hospital_code == settings.HOSPITAL_CODE,
+                ).first()
+            finally:
+                s.close()
+            if not u or u.role not in ("doctor", "nurse", "admin"):
+                _send(token, chat_id, "[X] /reply is for medical staff only. Link your account first with /link <username>.")
+                return
+            parts = text.split(maxsplit=2)
+            if len(parts) < 3:
+                _send(token, chat_id, (
+                    "Usage: /reply <esc_id_8chars> <note to patient>\n"
+                    "Example: /reply a1b2c3d4 Please continue antibiotics for 3 more days."
+                ))
+                return
+            short_id = parts[1].strip()
+            note = parts[2].strip()
+            s = SessionLocal()
+            try:
+                # Match by prefix (esc_id[:8] is what's shown to the doctor)
+                x = s.query(Escalation).filter(
+                    Escalation.id.like(short_id + "%"),
+                    Escalation.hospital_code == settings.HOSPITAL_CODE,
+                ).first()
+                if not x:
+                    _send(token, chat_id, f"[X] No escalation found starting with '{short_id}'.")
+                    return
+                # Update + resolve
+                x.acked_by = x.acked_by or u.id
+                x.acked_at = x.acked_at or now_utc()
+                x.resolved_by = u.id
+                x.resolved_at = now_utc()
+                x.status = "resolved"
+                x.resolution_note = f"[via Telegram by {u.display_name}] {note}"
+                s.commit()
+                # DM the patient (best-effort)
+                try:
+                    notify_patient_escalation_resolved(x.id, note)
+                except Exception:
+                    pass
+                _send(token, chat_id, (
+                    f"[OK] Escalation {short_id} resolved.\n\n"
+                    f"Patient has been notified:\n\"{note[:200]}\""
                 ))
             finally:
                 s.close()

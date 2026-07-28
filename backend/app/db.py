@@ -69,6 +69,7 @@ def _migrate_add_columns() -> None:
             ("telegram_sessions", "diet_info", "TEXT"),
             ("telegram_sessions", "medication_info", "TEXT"),
             ("telegram_sessions", "feeling_info", "TEXT"),
+            ("telegram_sessions", "last_checkin_date", "TEXT"),
             ("telegram_sessions", "is_admin", "INTEGER NOT NULL DEFAULT 0"),
             ("telegram_sessions", "auth_attempts", "INTEGER NOT NULL DEFAULT 0"),
             ("patients", "abha_verified", "INTEGER NOT NULL DEFAULT 0"),
