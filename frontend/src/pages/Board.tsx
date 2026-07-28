@@ -211,7 +211,7 @@ export function Board() {
       const r = await api<any>("/api/demo/scripted-red", { method: "POST" });
       setScriptedResult(r);
       // Refresh the page data so the new escalation + call show up
-      setTick(t => t + 1);
+      await refresh();
     } catch (ex) {
       setScriptedResult({ error: ex instanceof ApiError ? ex.message : "failed" });
     } finally {
