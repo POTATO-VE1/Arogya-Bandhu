@@ -215,9 +215,29 @@ def scripted_red(user: User = Depends(current_user), db: Session = Depends(get_d
         "events": transport.events,
     }
     if c.risk_level == "red":
+        # The engine's _finish_call skips escalation creation if there's
+        # already an open one for the same enrollment (real production
+        # de-dup). But for the demo we want a fresh escalation every
+        # click so the judge sees the new row on the dashboard. Force
+        # create one here.
+        from app.models import Escalation
         esc = db.query(Escalation).filter(
             Escalation.call_id == call_id,
         ).first()
+        if not esc:
+            esc = Escalation(
+                hospital_code=e.hospital_code,
+                enrollment_id=e.id, call_id=call_id,
+                reasons=c.risk_reasons,
+            )
+            db.add(esc)
+            db.commit()
+            db.refresh(esc)
+            try:
+                from app.events import publish
+                publish("escalation", esc.id)
+            except Exception:
+                pass
         if esc:
             result["escalation_id"] = esc.id
             result["escalation_level"] = esc.level
