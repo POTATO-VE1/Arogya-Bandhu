@@ -126,23 +126,16 @@ async def sim_call(ws: WebSocket):
 
 # ── scripted demo: drive a sim call to red with one click ──────────────────
 # The judge watches a full call go: greet → confirm family → questions →
-# patient says "chest pain" → red escalation created → callback scheduled.
+# patient says "wound has pus + bleeding" → red escalation created.
 # Used by the one-click "demo escalation scenario" button on the Board.
 # This is a synchronous endpoint that drives the same engine the WebSocket
 # uses, but pre-supplies the answers that lead to @end_red.
 
+# Node → digit mapping chosen so the call takes the "red flag" branch at
+# q_wound (digit 3 = "wound: pus/bleeding/fever (SSI red flag) → @end_red").
 SCRIPTED_RED_ANSWERS = {
     "confirm_family": "1",   # yes, this is the right person
-    "q_wound": "1",          # wound looks fine
-    "q_fever": "1",          # no fever
-    "q_breath": "3",         # chest pain / can't breathe (RED)
-    "q_symptom_course": "2", # symptoms got worse (RED)
-    "q_meds_today": "1",     # took all meds
-    "q_pillcount": "2",      # some pills left
-    "q_pillcount_remaining": "2",
-    "q_self_med": "1",       # no extra meds
-    "q_leftover": "1",       # no leftover antibiotics
-    "q_course_done": "1",    # almost done
+    "q_wound": "3",          # pus / bleeding / fever (RED)
 }
 
 
